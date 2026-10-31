@@ -94,3 +94,65 @@ export interface CustomerDashboardSummary {
   recentInvoices: CustomerInvoice[];
   recentPayments: CustomerPayment[];
 }
+
+export type DiscountType = 'PERCENTAGE' | 'FIXED';
+
+export interface ProductVariant {
+  id: string;
+  productId: string;
+  name: string;
+  priceAdjustment: number;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  type: string;
+  salesPrice: number;
+  costPrice: number;
+  notes?: string;
+  isActive: boolean;
+  variants: ProductVariant[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Plan {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  billingFrequency: Frequency;
+  minQuantity: number;
+  startDate?: string;
+  endDate?: string;
+  autoClose: boolean;
+  canPause: boolean;
+  canRenew: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DiscountRule {
+  id: string;
+  code: string;
+  description?: string;
+  type: DiscountType;
+  value: number;
+  minPurchase?: number;
+  startDate?: string;
+  endDate?: string;
+  maxUsage?: number;
+  timesUsed: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface DiscountValidationResult {
+  valid: boolean;
+  discountAmount: number;
+  finalAmount: number;
+  rule?: DiscountRule;
+  error?: string;
+}

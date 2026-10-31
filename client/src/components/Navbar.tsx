@@ -14,6 +14,7 @@ export const Navbar: React.FC = () => {
 
   const navLinks = [
     { name: 'Dashboard', path: '/' },
+    { name: 'Products & Plans', path: '/products' },
     { name: 'Subscriptions', path: '/subscriptions' },
     { name: 'Invoices', path: '/invoices' },
     { name: 'Payments', path: '/payments' },
@@ -28,7 +29,7 @@ export const Navbar: React.FC = () => {
           <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span className="font-semibold text-zinc-100">Brightloop Subscription Platform</span>
           <span className="hidden sm:inline text-zinc-500">|</span>
-          <span className="hidden sm:inline text-zinc-400">Member 1 Module: Auth & Customer Portal</span>
+          <span className="hidden sm:inline text-zinc-400">Full-Stack Modular Architecture</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-zinc-400">Quick Switch:</span>
@@ -78,22 +79,22 @@ export const Navbar: React.FC = () => {
                 brightloop
               </span>
               <span className="text-[10px] tracking-wider uppercase text-zinc-400 font-semibold">
-                Customer Portal
+                Subscription Platform
               </span>
             </div>
           </NavLink>
         </div>
 
         {/* Center Nav Links - Matching Reference Style */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-7">
           {navLinks.map((link) => (
             <NavLink
               key={link.path}
               to={link.path}
               className={({ isActive }) =>
-                `text-sm font-medium transition-colors ${
+                `text-xs lg:text-sm font-medium transition-colors ${
                   isActive
-                    ? 'text-zinc-950 font-semibold'
+                    ? 'text-zinc-950 font-semibold border-b-2 border-zinc-900 pb-1'
                     : 'text-zinc-500 hover:text-zinc-900'
                 }`
               }

@@ -1,89 +1,60 @@
 import { Router } from 'express';
 import { authenticateToken, requireRole } from '../../middleware/auth.middleware.js';
+import {
+  getAllProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  addProductVariant,
+  updateProductVariant,
+  deleteProductVariant,
+  getAllPlans,
+  getPlanById,
+  createPlan,
+  updatePlan,
+  deletePlan,
+  getAllDiscounts,
+  getDiscountById,
+  validateDiscountCode,
+  createDiscount,
+  updateDiscount,
+  deleteDiscount,
+} from './products.controller.js';
 
-// MEMBER 2 - PRODUCTS, PLANS & DISCOUNTS MODULE
 const router = Router();
 
-// Demo products data
-const demoProducts = [
-  {
-    id: 'prod-001',
-    name: 'Brightloop Core ERP',
-    type: 'Software',
-    salesPrice: 300.0,
-    costPrice: 50.0,
-    notes: 'Base enterprise platform',
-    variants: [
-      { id: 'var-001', name: 'Standard Edition', priceAdjustment: 0 },
-      { id: 'var-002', name: 'Odoo Brand Edition', priceAdjustment: 560.0 },
-    ],
-  },
-  {
-    id: 'prod-002',
-    name: 'User License Seat',
-    type: 'License',
-    salesPrice: 35.0,
-    costPrice: 5.0,
-    notes: 'Per-user recurring seat',
-    variants: [],
-  },
-  {
-    id: 'prod-003',
-    name: 'Advanced Financial Analytics Module',
-    type: 'Add-on',
-    salesPrice: 210.0,
-    costPrice: 30.0,
-    notes: 'Real-time financial BI dashboards',
-    variants: [],
-  },
-];
+// =================================================================
+// SUBSCRIPTION PLANS ROUTES (Must precede /:id)
+// =================================================================
+router.get('/plans', getAllPlans);
+router.get('/plans/:id', getPlanById);
+router.post('/plans', authenticateToken, requireRole('ADMIN', 'STAFF'), createPlan);
+router.put('/plans/:id', authenticateToken, requireRole('ADMIN', 'STAFF'), updatePlan);
+router.delete('/plans/:id', authenticateToken, requireRole('ADMIN', 'STAFF'), deletePlan);
 
-const demoPlans = [
-  {
-    id: 'plan-001',
-    name: 'Brightloop Starter',
-    price: 199.0,
-    billingFrequency: 'MONTHLY',
-    minQuantity: 1,
-    canPause: true,
-    canRenew: true,
-  },
-  {
-    id: 'plan-002',
-    name: 'Brightloop Enterprise Cloud Suite',
-    price: 1420.0,
-    billingFrequency: 'MONTHLY',
-    minQuantity: 5,
-    canPause: true,
-    canRenew: true,
-  },
-  {
-    id: 'plan-003',
-    name: 'Secure Cloud Automated Backup & DR',
-    price: 850.0,
-    billingFrequency: 'YEARLY',
-    minQuantity: 1,
-    canPause: false,
-    canRenew: true,
-  },
-];
+// =================================================================
+// DISCOUNT RULES & PROMOTIONS ROUTES (Must precede /:id)
+// =================================================================
+router.get('/discounts', getAllDiscounts);
+router.get('/discounts/validate/:code', validateDiscountCode);
+router.get('/discounts/:id', getDiscountById);
+router.post('/discounts', authenticateToken, requireRole('ADMIN', 'STAFF'), createDiscount);
+router.put('/discounts/:id', authenticateToken, requireRole('ADMIN', 'STAFF'), updateDiscount);
+router.delete('/discounts/:id', authenticateToken, requireRole('ADMIN', 'STAFF'), deleteDiscount);
 
-// Public / Authenticated route to view available products & plans
-router.get('/', (req, res) => {
-  res.json({ success: true, data: demoProducts });
-});
+// =================================================================
+// PRODUCTS & VARIANTS ROUTES
+// =================================================================
+router.get('/', getAllProducts);
+router.get('/:id', getProductById);
+router.post('/', authenticateToken, requireRole('ADMIN', 'STAFF'), createProduct);
+router.put('/:id', authenticateToken, requireRole('ADMIN', 'STAFF'), updateProduct);
+router.delete('/:id', authenticateToken, requireRole('ADMIN', 'STAFF'), deleteProduct);
 
-router.get('/plans', (req, res) => {
-  res.json({ success: true, data: demoPlans });
-});
-
-// Admin product creation stub (Member 2 hook)
-router.post('/', authenticateToken, requireRole('ADMIN'), (req, res) => {
-  res.status(201).json({
-    success: true,
-    message: 'Product created successfully (Member 2 Module).',
-    data: req.body,
-  });
-});
+// Product Variants sub-routes
+router.post('/:id/variants', authenticateToken, requireRole('ADMIN', 'STAFF'), addProductVariant);
+router.put('/:id/variants/:variantId', authenticateToken, requireRole('ADMIN', 'STAFF'), updateProductVariant);
+router.delete('/:id/variants/:variantId', authenticateToken, requireRole('ADMIN', 'STAFF'), deleteProductVariant);
 
 export default router;
