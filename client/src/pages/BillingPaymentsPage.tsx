@@ -68,7 +68,7 @@ export const BillingPaymentsPage: React.FC = () => {
         paymentMethod: payMethod,
         referenceNote: payRefNote,
       });
-      showToast(`Payment ${res.payment.paymentNumber} ($${res.payment.amount}) recorded!`);
+      showToast(`Payment ${res.payment.paymentNumber} (₹${res.payment.amount}) recorded!`);
       setIsPayModalOpen(false);
       setPayInvoiceId('');
       setPayAmount('');
@@ -121,8 +121,7 @@ export const BillingPaymentsPage: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm">
           <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Total Volume Logged</div>
-          <div className="text-3xl font-extrabold text-zinc-950 mt-2">
-            ${totalVolume.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+          <div className="text-3xl font-extrabold text-zinc-950 mt-2">₹{totalVolume.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </div>
           <div className="text-xs text-emerald-600 mt-1.5 font-semibold">100% Verified Receipts</div>
         </div>
@@ -135,8 +134,7 @@ export const BillingPaymentsPage: React.FC = () => {
 
         <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm">
           <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Avg Transaction Size</div>
-          <div className="text-3xl font-extrabold text-zinc-950 mt-2">
-            ${payments.length > 0 ? (totalVolume / payments.length).toFixed(2) : '0.00'}
+          <div className="text-3xl font-extrabold text-zinc-950 mt-2">₹{payments.length > 0 ? (totalVolume / payments.length).toFixed(2) : '0.00'}
           </div>
           <div className="text-xs text-zinc-500 mt-1.5 font-medium">Per cleared transaction</div>
         </div>
@@ -194,8 +192,7 @@ export const BillingPaymentsPage: React.FC = () => {
                         {p.paymentMethod}
                       </span>
                     </td>
-                    <td className="py-3.5 px-6 font-extrabold text-emerald-600 text-sm">
-                      ${p.amount.toFixed(2)}
+                    <td className="py-3.5 px-6 font-extrabold text-emerald-600 text-sm">₹{p.amount.toFixed(2)}
                     </td>
                     <td className="py-3.5 px-6">
                       <span className="inline-flex items-center gap-1 text-emerald-700 font-bold text-[11px]">
@@ -245,7 +242,7 @@ export const BillingPaymentsPage: React.FC = () => {
                     .filter((i) => i.status !== 'PAID' && i.status !== 'CANCELLED')
                     .map((inv) => (
                       <option key={inv.id} value={inv.id}>
-                        {inv.invoiceNumber} — ${inv.totalAmount.toFixed(2)} ({inv.status})
+                        {inv.invoiceNumber} — ₹${inv.totalAmount.toFixed(2)} ({inv.status})
                       </option>
                     ))}
                 </select>
@@ -253,7 +250,7 @@ export const BillingPaymentsPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-zinc-800 mb-1.5">Amount ($)</label>
+                  <label className="block font-bold text-zinc-800 mb-1.5">Amount (₹)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -346,7 +343,7 @@ export const BillingPaymentsPage: React.FC = () => {
               </div>
               <div className="flex justify-between py-3 text-lg font-extrabold text-zinc-950 pt-3">
                 <span>Amount Cleared</span>
-                <span className="text-emerald-600">${selectedReceipt.amount.toFixed(2)}</span>
+                <span className="text-emerald-600">₹{selectedReceipt.amount.toFixed(2)}</span>
               </div>
             </div>
 

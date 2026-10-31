@@ -185,8 +185,7 @@ export const CustomerDashboard: React.FC = () => {
               Outstanding Due
             </span>
             <div className="my-4">
-              <span className="text-3xl font-extrabold text-zinc-950">
-                ${metrics.outstandingAmount.toFixed(2)}
+              <span className="text-3xl font-extrabold text-zinc-950">₹{metrics.outstandingAmount.toFixed(2)}
               </span>
               <p className="text-xs text-amber-700 mt-1">
                 {metrics.outstandingAmount > 0 ? 'Payment Pending' : 'All Settled'}
@@ -247,9 +246,7 @@ export const CustomerDashboard: React.FC = () => {
       {metrics.outstandingAmount > 0 && (
         <div className="bg-zinc-900 text-white rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-amber-400 text-zinc-950 flex items-center justify-center font-bold text-xl flex-shrink-0">
-              $
-            </div>
+            <div className="w-12 h-12 rounded-2xl bg-amber-400 text-zinc-950 flex items-center justify-center font-bold text-xl flex-shrink-0">₹</div>
             <div>
               <h3 className="text-lg font-bold">Outstanding Invoices Awaiting Settlement</h3>
               <p className="text-zinc-400 text-sm mt-0.5">
@@ -316,8 +313,7 @@ export const CustomerDashboard: React.FC = () => {
                       <span className="text-xs font-bold text-zinc-900 uppercase tracking-wide">
                         {sub.subscriptionNumber}
                       </span>
-                      <span className="text-sm font-extrabold text-zinc-950">
-                        ${sub.totalAmount.toFixed(2)}
+                      <span className="text-sm font-extrabold text-zinc-950">₹{sub.totalAmount.toFixed(2)}
                         <span className="text-xs font-normal text-zinc-700">
                           /{sub.billingFrequency.toLowerCase()}
                         </span>
@@ -330,8 +326,7 @@ export const CustomerDashboard: React.FC = () => {
                           <span className="truncate pr-2 font-medium">
                             {line.quantity}x {line.productName}
                           </span>
-                          <span className="font-semibold text-zinc-950 whitespace-nowrap">
-                            ${line.amount.toFixed(2)}
+                          <span className="font-semibold text-zinc-950 whitespace-nowrap">₹{line.amount.toFixed(2)}
                           </span>
                         </div>
                       ))}
@@ -402,11 +397,9 @@ export const CustomerDashboard: React.FC = () => {
                     <td className="py-4 px-6 text-zinc-600">
                       {new Date(inv.dueDate).toLocaleDateString()}
                     </td>
-                    <td className="py-4 px-6 font-bold text-zinc-950">
-                      ${inv.totalAmount.toFixed(2)}
+                    <td className="py-4 px-6 font-bold text-zinc-950">₹{inv.totalAmount.toFixed(2)}
                       {inv.discountAmount > 0 && (
-                        <span className="block text-[10px] text-emerald-600 font-normal">
-                          -${inv.discountAmount.toFixed(2)} discount applied
+                        <span className="block text-[10px] text-emerald-600 font-normal">-₹{inv.discountAmount.toFixed(2)} discount applied
                         </span>
                       )}
                     </td>
@@ -467,23 +460,23 @@ export const CustomerDashboard: React.FC = () => {
             <div className="bg-zinc-50 rounded-2xl p-4 space-y-2 text-sm border border-zinc-100">
               <div className="flex justify-between text-zinc-600">
                 <span>Subtotal:</span>
-                <span>${payingInvoice.subtotal.toFixed(2)}</span>
+                <span>₹{payingInvoice.subtotal.toFixed(2)}</span>
               </div>
               {payingInvoice.taxAmount > 0 && (
                 <div className="flex justify-between text-zinc-600">
                   <span>Taxes:</span>
-                  <span>+${payingInvoice.taxAmount.toFixed(2)}</span>
+                  <span>+₹{payingInvoice.taxAmount.toFixed(2)}</span>
                 </div>
               )}
               {payingInvoice.discountAmount > 0 && (
                 <div className="flex justify-between text-emerald-600 font-medium">
                   <span>Discount Applied:</span>
-                  <span>-${payingInvoice.discountAmount.toFixed(2)}</span>
+                  <span>-₹{payingInvoice.discountAmount.toFixed(2)}</span>
                 </div>
               )}
               <div className="border-t border-zinc-200 pt-2 flex justify-between font-extrabold text-zinc-950 text-base">
                 <span>Total Due:</span>
-                <span>${payingInvoice.totalAmount.toFixed(2)}</span>
+                <span>₹{payingInvoice.totalAmount.toFixed(2)}</span>
               </div>
             </div>
 

@@ -191,8 +191,7 @@ export const SubscriptionsPage: React.FC = () => {
                       <span className={isSelected ? 'text-zinc-400' : 'text-zinc-500'}>
                         Frequency: <strong>{sub.billingFrequency}</strong>
                       </span>
-                      <span className="text-sm font-extrabold">
-                        ${sub.totalAmount.toFixed(2)}
+                      <span className="text-sm font-extrabold">₹{sub.totalAmount.toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -277,14 +276,12 @@ export const SubscriptionsPage: React.FC = () => {
                             <td className="py-3 px-4 text-center text-zinc-600">
                               {line.quantity}
                             </td>
-                            <td className="py-3 px-4 text-right text-zinc-600 font-mono">
-                              ${line.unitPrice.toFixed(2)}
+                            <td className="py-3 px-4 text-right text-zinc-600 font-mono">₹{line.unitPrice.toFixed(2)}
                             </td>
                             <td className="py-3 px-4 text-right text-zinc-500">
                               {line.taxRate}%
                             </td>
-                            <td className="py-3 px-4 text-right font-bold text-zinc-950 font-mono">
-                              ${line.amount.toFixed(2)}
+                            <td className="py-3 px-4 text-right font-bold text-zinc-950 font-mono">₹{line.amount.toFixed(2)}
                             </td>
                           </tr>
                         ))}
@@ -294,8 +291,7 @@ export const SubscriptionsPage: React.FC = () => {
                           <td colSpan={4} className="py-3 px-4 text-right uppercase text-xs text-zinc-500">
                             Total Recurring Amount:
                           </td>
-                          <td className="py-3 px-4 text-right text-sm font-mono font-black text-indigo-600">
-                            ${selectedSub.totalAmount.toFixed(2)}
+                          <td className="py-3 px-4 text-right text-sm font-mono font-black text-indigo-600">₹{selectedSub.totalAmount.toFixed(2)}
                           </td>
                         </tr>
                       </tfoot>

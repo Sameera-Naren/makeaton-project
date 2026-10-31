@@ -70,8 +70,7 @@ export const PaymentsPage: React.FC = () => {
             <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider block">
               Total Settled Payments
             </span>
-            <span className="text-xl font-extrabold text-zinc-950 font-mono">
-              ${totalSettled.toFixed(2)}
+            <span className="text-xl font-extrabold text-zinc-950 font-mono">₹{totalSettled.toFixed(2)}
             </span>
           </div>
         </div>
@@ -133,8 +132,7 @@ export const PaymentsPage: React.FC = () => {
                     <td className="py-4 px-6 text-xs text-zinc-500 font-mono">
                       {p.referenceNote || 'Direct bank settlement'}
                     </td>
-                    <td className="py-4 px-6 text-right font-mono font-bold text-zinc-950 text-sm">
-                      ${p.amount.toFixed(2)}
+                    <td className="py-4 px-6 text-right font-mono font-bold text-zinc-950 text-sm">₹{p.amount.toFixed(2)}
                     </td>
                     <td className="py-4 px-6 text-center">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
