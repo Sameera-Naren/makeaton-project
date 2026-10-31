@@ -8,6 +8,9 @@ import { InvoicesPage } from './pages/InvoicesPage';
 import { PaymentsPage } from './pages/PaymentsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { LoginPage } from './pages/LoginPage';
+import { QuotationsPage } from './pages/QuotationsPage';
+import { QuotationCreatePage } from './pages/QuotationCreatePage';
+import { QuotationDetailPage } from './pages/QuotationDetailPage';
 
 const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
@@ -31,7 +34,7 @@ const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
       <footer className="border-t border-zinc-200/80 bg-white py-6 text-center text-xs text-zinc-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>Brightloop Software Platform — Hackathon 2026 Edition</span>
-          <span className="text-zinc-400">Team Modular Monolith • Member 1 Portal Active</span>
+          <span className="text-zinc-400">Team Modular Monolith • Member 1 &amp; Member 3 Integrated</span>
         </div>
       </footer>
     </div>
@@ -52,6 +55,32 @@ export const App: React.FC = () => {
               </ProtectedLayout>
             }
           />
+          {/* Member 3: Quotations Routes */}
+          <Route
+            path="/quotations"
+            element={
+              <ProtectedLayout>
+                <QuotationsPage />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/quotations/new"
+            element={
+              <ProtectedLayout>
+                <QuotationCreatePage />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/quotations/:id"
+            element={
+              <ProtectedLayout>
+                <QuotationDetailPage />
+              </ProtectedLayout>
+            }
+          />
+          {/* Subscriptions Hub (Customer & Staff Lifecycle) */}
           <Route
             path="/subscriptions"
             element={

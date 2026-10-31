@@ -12,6 +12,7 @@ export interface User {
 
 export type Frequency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
 export type SubscriptionStatus = 'DRAFT' | 'QUOTATION' | 'CONFIRMED' | 'ACTIVE' | 'PAUSED' | 'CLOSED';
+export type QuotationStatus = 'DRAFT' | 'SENT' | 'CONFIRMED' | 'CONVERTED' | 'EXPIRED';
 export type InvoiceStatus = 'DRAFT' | 'CONFIRMED' | 'PAID' | 'OVERDUE' | 'CANCELLED';
 export type PaymentMethod = 'CREDIT_CARD' | 'BANK_TRANSFER' | 'STRIPE' | 'CASH' | 'UPI';
 export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
@@ -30,6 +31,10 @@ export interface CustomerSubscription {
   id: string;
   subscriptionNumber: string;
   customerId: string;
+  customerName?: string;
+  customerCompany?: string;
+  quotationId?: string;
+  quotationNumber?: string;
   planName: string;
   billingFrequency: Frequency;
   startDate: string;
@@ -40,6 +45,42 @@ export interface CustomerSubscription {
   notes?: string;
   totalAmount: number;
   lines: SubscriptionLineItem[];
+}
+
+export interface QuotationLineItem {
+  id: string;
+  productId: string;
+  productName: string;
+  variantId?: string;
+  variantName?: string;
+  quantity: number;
+  unitPrice: number;
+  taxRate: number;
+  discount: number;
+  amount: number;
+}
+
+export interface Quotation {
+  id: string;
+  quotationNumber: string;
+  customerId: string;
+  customerName?: string;
+  customerCompany?: string;
+  customerEmail?: string;
+  planId: string;
+  planName?: string;
+  validUntil: string;
+  subtotal: number;
+  taxAmount: number;
+  discountAmount: number;
+  totalAmount: number;
+  status: QuotationStatus;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  subscriptionId?: string;
+  subscriptionNumber?: string;
+  lines: QuotationLineItem[];
 }
 
 export interface InvoiceLineItem {

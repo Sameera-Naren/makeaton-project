@@ -3,6 +3,7 @@ import {
   CustomerInvoice,
   CustomerPayment,
   CustomerSubscription,
+  Quotation,
   User,
 } from '../types';
 
@@ -34,7 +35,6 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   return json.data as T;
 }
 
-// Auth API Calls
 export const api = {
   auth: {
     login: async (credentials: { email: string; password: string }) => {
@@ -131,6 +131,117 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify(updates),
       });
+    },
+  },
+
+  // ==========================================
+  // MEMBER 3: QUOTATIONS API
+  // ==========================================
+  quotations: {
+    getAll: async (status?: string): Promise<Quotation[]> => {
+      const query = status && status !== 'ALL' ? `?status=${status}` : '';
+      return request<Quotation[]>(`/subscriptions/quotations${query}`);
+    },
+
+    getById: async (id: string): Promise<Quotation> => {
+      return request<Quotation>(`/subscriptions/quotations/${id}`);
+    },
+
+    create: async (data: {
+      customerId: string;
+      planId?: string;
+      planName?: string;
+      validUntil?: string;
+      notes?: string;
+      lines: Array<{
+        productId: string;
+        productName: string;
+        variantId?: string;
+        variantName?: string;
+        quantity: number;
+        unitPrice: number;
+        taxRate?: number;
+        discount?: number;
+      }>;
+    }): Promise<Quotation> => {
+      return request<Quotation>('/subscriptions/quotations', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    update: async (id: string, updates: Partial<Quotation>): Promise<Quotation> => {
+      return request<Quotation>(`/subscriptions/quotations/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates),
+      });
+    },
+
+    confirm: async (id: string): Promise<Quotation> => {
+      return request<Quotation>(`/subscriptions/quotations/${id}/confirm`, {
+        method: 'POST',
+      });
+    },
+
+    convert: async (id: string): Promise<{ quotation: Quotation; subscription: CustomerSubscription }> => {
+      return request<{ quotation: Quotation; subscription: CustomerSubscription }>(
+        `/subscriptions/quotations/${id}/convert`,
+        {
+          method: 'POST',
+        }
+      );
+    },
+  },
+
+  // ==========================================
+  // MEMBER 3: SUBSCRIPTIONS (STAFF/ADMIN)
+  // ==========================================
+  subscriptions: {
+    getAll: async (): Promise<CustomerSubscription[]> => {
+      return request<CustomerSubscription[]>('/subscriptions/all');
+    },
+
+    getById: async (id: string): Promise<CustomerSubscription> => {
+      return request<CustomerSubscription>(`/subscriptions/${id}`);
+    },
+
+    updateStatus: async (id: string, status: string): Promise<CustomerSubscription> => {
+      return request<CustomerSubscription>(`/subscriptions/${id}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({ status }),
+      });
+    },
+
+    pause: async (id: string): Promise<CustomerSubscription> => {
+      return request<CustomerSubscription>(`/subscriptions/${id}/pause`, {
+        method: 'POST',
+      });
+    },
+
+    resume: async (id: string): Promise<CustomerSubscription> => {
+      return request<CustomerSubscription>(`/subscriptions/${id}/resume`, {
+        method: 'POST',
+      });
+    },
+
+    close: async (id: string): Promise<CustomerSubscription> => {
+      return request<CustomerSubscription>(`/subscriptions/${id}/close`, {
+        method: 'POST',
+      });
+    },
+
+    getCustomers: async (): Promise<User[]> => {
+      return request<User[]>('/subscriptions/customers');
+    },
+  },
+
+  // Helper product queries
+  products: {
+    getAll: async (): Promise<any[]> => {
+      return request<any[]>('/products');
+    },
+    getPlans: async (): Promise<any[]> => {
+      return request<any[]>('/products/plans');
     },
   },
 };

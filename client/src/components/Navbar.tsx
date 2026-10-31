@@ -1,7 +1,7 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, ArrowUpRight, ShieldCheck, UserCheck, Layers } from 'lucide-react';
+import { LogOut, ArrowUpRight, ShieldCheck, UserCheck, Layers, Plus } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const { user, logout, quickDemoLogin } = useAuth();
@@ -14,6 +14,7 @@ export const Navbar: React.FC = () => {
 
   const navLinks = [
     { name: 'Dashboard', path: '/' },
+    { name: 'Quotations', path: '/quotations', highlight: true },
     { name: 'Subscriptions', path: '/subscriptions' },
     { name: 'Invoices', path: '/invoices' },
     { name: 'Payments', path: '/payments' },
@@ -28,7 +29,7 @@ export const Navbar: React.FC = () => {
           <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span className="font-semibold text-zinc-100">Brightloop Subscription Platform</span>
           <span className="hidden sm:inline text-zinc-500">|</span>
-          <span className="hidden sm:inline text-zinc-400">Member 1 Module: Auth & Customer Portal</span>
+          <span className="hidden sm:inline text-zinc-400">Member 1 &amp; Member 3 Active Modules</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-zinc-400">Quick Switch:</span>
@@ -78,33 +79,49 @@ export const Navbar: React.FC = () => {
                 brightloop
               </span>
               <span className="text-[10px] tracking-wider uppercase text-zinc-400 font-semibold">
-                Customer Portal
+                Enterprise Suite
               </span>
             </div>
           </NavLink>
         </div>
 
-        {/* Center Nav Links - Matching Reference Style */}
-        <nav className="hidden md:flex items-center gap-8">
+        {/* Center Nav Links */}
+        <nav className="hidden md:flex items-center gap-7">
           {navLinks.map((link) => (
             <NavLink
               key={link.path}
               to={link.path}
               className={({ isActive }) =>
-                `text-sm font-medium transition-colors ${
+                `text-sm font-semibold transition-colors flex items-center gap-1.5 ${
                   isActive
-                    ? 'text-zinc-950 font-semibold'
+                    ? 'text-zinc-950 font-bold'
                     : 'text-zinc-500 hover:text-zinc-900'
                 }`
               }
             >
-              {link.name}
+              <span>{link.name}</span>
+              {link.highlight && (
+                <span className="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold bg-pastel-blue text-indigo-950">
+                  M3
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
 
         {/* Right Action Buttons */}
         <div className="flex items-center gap-3">
+          {/* Quick Create Quote Button (Staff/Admin) */}
+          {(user?.role === 'STAFF' || user?.role === 'ADMIN') && (
+            <Link
+              to="/quotations/new"
+              className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-zinc-950 text-white text-xs font-bold hover:bg-zinc-800 transition shadow-sm"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ Quote</span>
+            </Link>
+          )}
+
           {user && (
             <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-zinc-200 bg-zinc-50 text-xs text-zinc-700">
               {user.role === 'ADMIN' && <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />}

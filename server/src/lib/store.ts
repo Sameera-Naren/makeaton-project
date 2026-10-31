@@ -4,7 +4,10 @@ import {
   CustomerInvoice,
   CustomerPayment,
   CustomerSubscription,
+  Quotation,
+  QuotationStatus,
   Role,
+  SubscriptionStatus,
   UserPayload,
 } from '../types/index.js';
 
@@ -18,6 +21,7 @@ class Store {
   subscriptions: CustomerSubscription[] = [];
   invoices: CustomerInvoice[] = [];
   payments: CustomerPayment[] = [];
+  quotations: Quotation[] = [];
 
   constructor() {
     this.seed();
@@ -70,6 +74,10 @@ class Store {
         id: 'sub-001',
         subscriptionNumber: 'SUB-2026-0041',
         customerId: customerUser.id,
+        customerName: customerUser.name,
+        customerCompany: customerUser.companyName,
+        quotationId: 'quo-001',
+        quotationNumber: 'QUO-2026-0098',
         planName: 'Brightloop Enterprise Cloud Suite',
         billingFrequency: 'MONTHLY',
         startDate: '2026-01-15T00:00:00.000Z',
@@ -113,6 +121,8 @@ class Store {
         id: 'sub-002',
         subscriptionNumber: 'SUB-2026-0089',
         customerId: customerUser.id,
+        customerName: customerUser.name,
+        customerCompany: customerUser.companyName,
         planName: 'Secure Cloud Automated Backup & DR',
         billingFrequency: 'YEARLY',
         startDate: '2026-03-01T00:00:00.000Z',
@@ -138,6 +148,8 @@ class Store {
         id: 'sub-003',
         subscriptionNumber: 'SUB-2026-0012',
         customerId: customerUser.id,
+        customerName: customerUser.name,
+        customerCompany: customerUser.companyName,
         planName: 'Legacy Marketing Automation Add-on',
         billingFrequency: 'MONTHLY',
         startDate: '2025-06-01T00:00:00.000Z',
@@ -160,6 +172,147 @@ class Store {
       },
     ];
 
+    // Seed Member 3 Quotations
+    this.quotations = [
+      {
+        id: 'quo-001',
+        quotationNumber: 'QUO-2026-0098',
+        customerId: customerUser.id,
+        customerName: customerUser.name,
+        customerCompany: customerUser.companyName,
+        customerEmail: customerUser.email,
+        planId: 'plan-002',
+        planName: 'Brightloop Enterprise Cloud Suite',
+        validUntil: '2026-03-31T00:00:00.000Z',
+        subtotal: 1420.0,
+        taxAmount: 0.0,
+        discountAmount: 0.0,
+        totalAmount: 1420.0,
+        status: 'CONVERTED',
+        subscriptionId: 'sub-001',
+        subscriptionNumber: 'SUB-2026-0041',
+        notes: 'Converted to initial production subscription on Jan 15.',
+        createdAt: '2026-01-10T09:00:00.000Z',
+        updatedAt: '2026-01-15T11:20:00.000Z',
+        lines: [
+          {
+            id: 'ql-001',
+            productId: 'prod-001',
+            productName: 'Core ERP Software Base',
+            variantId: 'var-002',
+            variantName: 'Odoo Brand Edition (+560)',
+            quantity: 1,
+            unitPrice: 860.0,
+            taxRate: 0,
+            discount: 0,
+            amount: 860.0,
+          },
+          {
+            id: 'ql-002',
+            productId: 'prod-002',
+            productName: 'Staff User Seats (Concurrent)',
+            quantity: 10,
+            unitPrice: 35.0,
+            taxRate: 0,
+            discount: 0,
+            amount: 350.0,
+          },
+          {
+            id: 'ql-003',
+            productId: 'prod-003',
+            productName: 'Advanced Financial Analytics Module',
+            quantity: 1,
+            unitPrice: 210.0,
+            taxRate: 0,
+            discount: 0,
+            amount: 210.0,
+          },
+        ],
+      },
+      {
+        id: 'quo-002',
+        quotationNumber: 'QUO-2026-0142',
+        customerId: customerUser.id,
+        customerName: customerUser.name,
+        customerCompany: customerUser.companyName,
+        customerEmail: customerUser.email,
+        planId: 'plan-002',
+        planName: 'Brightloop Enterprise Cloud Suite',
+        validUntil: '2026-11-30T00:00:00.000Z',
+        subtotal: 960.0,
+        taxAmount: 96.0,
+        discountAmount: 50.0,
+        totalAmount: 1006.0,
+        status: 'CONFIRMED',
+        notes: 'Approved by CFO for Q4 regional sales expansion. Ready for subscription activation.',
+        createdAt: '2026-10-25T14:30:00.000Z',
+        updatedAt: '2026-10-28T16:45:00.000Z',
+        lines: [
+          {
+            id: 'ql-004',
+            productId: 'prod-001',
+            productName: 'Brightloop Core ERP (Standard)',
+            quantity: 1,
+            unitPrice: 300.0,
+            taxRate: 10,
+            discount: 0,
+            amount: 300.0,
+          },
+          {
+            id: 'ql-005',
+            productId: 'prod-002',
+            productName: 'User License Seat',
+            quantity: 12,
+            unitPrice: 35.0,
+            taxRate: 10,
+            discount: 0,
+            amount: 420.0,
+          },
+          {
+            id: 'ql-006',
+            productId: 'prod-003',
+            productName: 'Advanced Financial Analytics Module',
+            quantity: 1,
+            unitPrice: 210.0,
+            taxRate: 10,
+            discount: 50,
+            amount: 160.0,
+          },
+        ],
+      },
+      {
+        id: 'quo-003',
+        quotationNumber: 'QUO-2026-0155',
+        customerId: customerUser.id,
+        customerName: customerUser.name,
+        customerCompany: customerUser.companyName,
+        customerEmail: customerUser.email,
+        planId: 'plan-003',
+        planName: 'Secure Cloud Automated Backup & DR',
+        validUntil: '2026-12-15T00:00:00.000Z',
+        subtotal: 850.0,
+        taxAmount: 0.0,
+        discountAmount: 0.0,
+        totalAmount: 850.0,
+        status: 'DRAFT',
+        notes: 'Draft proposal for high-capacity disaster recovery vault expansion.',
+        createdAt: '2026-10-30T10:15:00.000Z',
+        updatedAt: '2026-10-30T10:15:00.000Z',
+        lines: [
+          {
+            id: 'ql-007',
+            productId: 'prod-003',
+            productName: 'Cloud Vault 2TB Tier (Annual)',
+            quantity: 1,
+            unitPrice: 850.0,
+            taxRate: 0,
+            discount: 0,
+            amount: 850.0,
+          },
+        ],
+      },
+    ];
+
     // Seed Invoices for Alex
     this.invoices = [
       {
@@ -169,13 +322,13 @@ class Store {
         subscriptionId: 'sub-001',
         subscriptionNumber: 'SUB-2026-0041',
         issueDate: '2026-10-15T00:00:00.000Z',
-        dueDate: '2026-11-15T00:00:00.000Z',
+        dueDate: '2026-10-30T00:00:00.000Z',
         subtotal: 1420.0,
         taxAmount: 142.0,
-        discountAmount: 142.0, // 10% coupon promo
+        discountAmount: 142.0,
         totalAmount: 1420.0,
-        status: 'CONFIRMED', // Outstanding / Due
-        notes: 'October 2026 recurring monthly cycle. Please remit before due date.',
+        status: 'CONFIRMED',
+        notes: 'October 2026 recurring monthly invoice. Discount code FALL2026 applied.',
         lines: [
           {
             id: 'invl-1',
@@ -346,6 +499,10 @@ class Store {
     return this.users.find((u) => u.id === id);
   }
 
+  getAllCustomers(): UserPayload[] {
+    return this.users.filter((u) => u.role === 'CUSTOMER');
+  }
+
   createUser(user: StoredUser): StoredUser {
     this.users.push(user);
     return user;
@@ -358,13 +515,295 @@ class Store {
     return user;
   }
 
-  // Customer portal queries
+  // ==========================================
+  // MEMBER 3: QUOTATIONS METHODS
+  // ==========================================
+
+  getQuotations(filters?: { status?: string; customerId?: string }): Quotation[] {
+    return this.quotations.filter((q) => {
+      const matchStatus = !filters?.status || filters.status === 'ALL' || q.status === filters.status;
+      const matchCustomer = !filters?.customerId || q.customerId === filters.customerId;
+      return matchStatus && matchCustomer;
+    });
+  }
+
+  getQuotationById(id: string): Quotation | undefined {
+    return this.quotations.find((q) => q.id === id || q.quotationNumber === id);
+  }
+
+  createQuotation(data: {
+    customerId: string;
+    planId: string;
+    planName?: string;
+    validUntil?: string;
+    notes?: string;
+    lines: Array<{
+      productId: string;
+      productName: string;
+      variantId?: string;
+      variantName?: string;
+      quantity: number;
+      unitPrice: number;
+      taxRate?: number;
+      discount?: number;
+    }>;
+  }): Quotation {
+    const customer = this.findUserById(data.customerId);
+    const quotationNumber = `QUO-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const validUntil =
+      data.validUntil ||
+      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    let subtotal = 0;
+    let taxAmount = 0;
+    let discountAmount = 0;
+
+    const lines = (data.lines || []).map((l, index) => {
+      const taxRate = l.taxRate ?? 0;
+      const discount = l.discount ?? 0;
+      const lineSubtotal = l.quantity * l.unitPrice;
+      const lineDiscount = discount;
+      const taxable = Math.max(0, lineSubtotal - lineDiscount);
+      const lineTax = (taxable * taxRate) / 100;
+      const amount = taxable + lineTax;
+
+      subtotal += lineSubtotal;
+      taxAmount += lineTax;
+      discountAmount += lineDiscount;
+
+      return {
+        id: `ql-${Date.now()}-${index}`,
+        productId: l.productId,
+        productName: l.productName,
+        variantId: l.variantId,
+        variantName: l.variantName,
+        quantity: l.quantity,
+        unitPrice: l.unitPrice,
+        taxRate,
+        discount,
+        amount,
+      };
+    });
+
+    const totalAmount = Math.max(0, subtotal - discountAmount + taxAmount);
+
+    const quotation: Quotation = {
+      id: `quo-${Date.now()}`,
+      quotationNumber,
+      customerId: data.customerId,
+      customerName: customer?.name || 'Customer',
+      customerCompany: customer?.companyName || 'Brightloop Client',
+      customerEmail: customer?.email,
+      planId: data.planId,
+      planName: data.planName || 'Enterprise Plan',
+      validUntil,
+      subtotal,
+      taxAmount,
+      discountAmount,
+      totalAmount,
+      status: 'DRAFT',
+      notes: data.notes || '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      lines,
+    };
+
+    this.quotations.unshift(quotation);
+    return quotation;
+  }
+
+  updateQuotation(
+    id: string,
+    updates: {
+      notes?: string;
+      validUntil?: string;
+      lines?: Array<{
+        productId: string;
+        productName: string;
+        variantId?: string;
+        variantName?: string;
+        quantity: number;
+        unitPrice: number;
+        taxRate?: number;
+        discount?: number;
+      }>;
+    }
+  ): Quotation {
+    const q = this.getQuotationById(id);
+    if (!q) throw new Error(`Quotation '${id}' not found`);
+    if (q.status !== 'DRAFT') {
+      throw new Error(`Only DRAFT quotations can be edited. Current status: ${q.status}`);
+    }
+
+    if (updates.notes !== undefined) q.notes = updates.notes;
+    if (updates.validUntil) q.validUntil = updates.validUntil;
+
+    if (updates.lines) {
+      let subtotal = 0;
+      let taxAmount = 0;
+      let discountAmount = 0;
+
+      q.lines = updates.lines.map((l, index) => {
+        const taxRate = l.taxRate ?? 0;
+        const discount = l.discount ?? 0;
+        const lineSubtotal = l.quantity * l.unitPrice;
+        const lineDiscount = discount;
+        const taxable = Math.max(0, lineSubtotal - lineDiscount);
+        const lineTax = (taxable * taxRate) / 100;
+        const amount = taxable + lineTax;
+
+        subtotal += lineSubtotal;
+        taxAmount += lineTax;
+        discountAmount += lineDiscount;
+
+        return {
+          id: `ql-${Date.now()}-${index}`,
+          productId: l.productId,
+          productName: l.productName,
+          variantId: l.variantId,
+          variantName: l.variantName,
+          quantity: l.quantity,
+          unitPrice: l.unitPrice,
+          taxRate,
+          discount,
+          amount,
+        };
+      });
+
+      q.subtotal = subtotal;
+      q.taxAmount = taxAmount;
+      q.discountAmount = discountAmount;
+      q.totalAmount = Math.max(0, subtotal - discountAmount + taxAmount);
+    }
+
+    q.updatedAt = new Date().toISOString();
+    return q;
+  }
+
+  confirmQuotation(id: string): Quotation {
+    const q = this.getQuotationById(id);
+    if (!q) throw new Error(`Quotation '${id}' not found`);
+    if (q.status !== 'DRAFT') {
+      throw new Error(`Only DRAFT quotations can be confirmed. Current status: ${q.status}`);
+    }
+
+    q.status = 'CONFIRMED';
+    q.updatedAt = new Date().toISOString();
+    return q;
+  }
+
+  convertQuotationToSubscription(id: string): {
+    quotation: Quotation;
+    subscription: CustomerSubscription;
+  } {
+    const q = this.getQuotationById(id);
+    if (!q) throw new Error(`Quotation '${id}' not found`);
+    if (q.status !== 'CONFIRMED') {
+      throw new Error(
+        `Only CONFIRMED quotations can be converted to subscriptions. Current status: ${q.status}`
+      );
+    }
+    if (q.subscriptionId) {
+      throw new Error(
+        `Quotation ${q.quotationNumber} has already been converted to subscription ${q.subscriptionNumber}`
+      );
+    }
+
+    const subNumber = `SUB-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const subId = `sub-${Date.now()}`;
+
+    const newSub: CustomerSubscription = {
+      id: subId,
+      subscriptionNumber: subNumber,
+      customerId: q.customerId,
+      customerName: q.customerName,
+      customerCompany: q.customerCompany,
+      quotationId: q.id,
+      quotationNumber: q.quotationNumber,
+      planName: q.planName || 'Enterprise Subscription',
+      billingFrequency: 'MONTHLY',
+      startDate: new Date().toISOString(),
+      expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+      paymentTerms: 'Net 15',
+      status: 'ACTIVE',
+      autoRenew: true,
+      notes: `Generated from Quotation ${q.quotationNumber}. ${q.notes || ''}`,
+      totalAmount: q.totalAmount,
+      lines: q.lines.map((ql, i) => ({
+        id: `subl-${Date.now()}-${i}`,
+        productName: ql.productName,
+        variantName: ql.variantName,
+        quantity: ql.quantity,
+        unitPrice: ql.unitPrice,
+        taxRate: ql.taxRate,
+        amount: ql.amount,
+      })),
+    };
+
+    // Update Quotation state
+    q.status = 'CONVERTED';
+    q.subscriptionId = newSub.id;
+    q.subscriptionNumber = newSub.subscriptionNumber;
+    q.updatedAt = new Date().toISOString();
+
+    // Store new subscription
+    this.subscriptions.unshift(newSub);
+
+    return { quotation: q, subscription: newSub };
+  }
+
+  // ==========================================
+  // MEMBER 3: SUBSCRIPTIONS METHODS
+  // ==========================================
+
+  getAllSubscriptions(): CustomerSubscription[] {
+    return this.subscriptions;
+  }
+
+  updateSubscriptionStatus(id: string, status: SubscriptionStatus): CustomerSubscription {
+    const sub = this.subscriptions.find((s) => s.id === id || s.subscriptionNumber === id);
+    if (!sub) throw new Error(`Subscription '${id}' not found`);
+
+    const validTransitions: Record<SubscriptionStatus, SubscriptionStatus[]> = {
+      DRAFT: ['QUOTATION', 'CONFIRMED', 'CLOSED'],
+      QUOTATION: ['CONFIRMED', 'CLOSED'],
+      CONFIRMED: ['ACTIVE', 'CLOSED'],
+      ACTIVE: ['PAUSED', 'CLOSED'],
+      PAUSED: ['ACTIVE', 'CLOSED'],
+      CLOSED: [],
+    };
+
+    const allowed = validTransitions[sub.status] || [];
+    if (!allowed.includes(status)) {
+      throw new Error(`Cannot transition subscription from ${sub.status} to ${status}`);
+    }
+
+    sub.status = status;
+    return sub;
+  }
+
+  pauseSubscription(id: string): CustomerSubscription {
+    return this.updateSubscriptionStatus(id, 'PAUSED');
+  }
+
+  resumeSubscription(id: string): CustomerSubscription {
+    return this.updateSubscriptionStatus(id, 'ACTIVE');
+  }
+
+  closeSubscription(id: string): CustomerSubscription {
+    return this.updateSubscriptionStatus(id, 'CLOSED');
+  }
+
+  // ==========================================
+  // CUSTOMER PORTAL & INVOICE METHODS
+  // ==========================================
+
   getCustomerSubscriptions(customerId: string): CustomerSubscription[] {
     return this.subscriptions.filter((s) => s.customerId === customerId);
   }
 
   getSubscriptionById(id: string, customerId?: string): CustomerSubscription | undefined {
-    const sub = this.subscriptions.find((s) => s.id === id);
+    const sub = this.subscriptions.find((s) => s.id === id || s.subscriptionNumber === id);
     if (!sub) return undefined;
     if (customerId && sub.customerId !== customerId) return undefined;
     return sub;
@@ -375,7 +814,7 @@ class Store {
   }
 
   getInvoiceById(id: string, customerId?: string): CustomerInvoice | undefined {
-    const inv = this.invoices.find((i) => i.id === id);
+    const inv = this.invoices.find((i) => i.id === id || i.invoiceNumber === id);
     if (!inv) return undefined;
     if (customerId && inv.customerId !== customerId) return undefined;
     return inv;
@@ -385,7 +824,6 @@ class Store {
     return this.payments.filter((p) => p.customerId === customerId);
   }
 
-  // Simulated payment recording for customer portal
   recordCustomerPayment(
     customerId: string,
     invoiceId: string,
@@ -416,7 +854,6 @@ class Store {
     return { payment, invoice };
   }
 
-  // Customer Dashboard Summary Builder
   getCustomerDashboard(customerId: string): CustomerDashboardSummary | null {
     const user = this.findUserById(customerId);
     if (!user) return null;
@@ -426,13 +863,11 @@ class Store {
     const invoices = this.getCustomerInvoices(customerId);
     const payments = this.getCustomerPayments(customerId);
 
-    // Compute outstanding amounts: Invoices that are NOT 'PAID' and NOT 'CANCELLED'
     const outstandingInvoices = invoices.filter(
       (inv) => inv.status === 'CONFIRMED' || inv.status === 'OVERDUE' || inv.status === 'DRAFT'
     );
     const outstandingAmount = outstandingInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
 
-    // Find nearest upcoming renewal date
     const futureRenewals = activeSubs
       .map((s) => s.expiryDate)
       .filter((d): d is string => !!d && new Date(d) > new Date())
