@@ -1,0 +1,13 @@
+{
+  "name": "subscription-management-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Brightloop Software Subscription Management System - Hackathon Monolith",
+  "scripts": {
+    "dev": "npm run dev:client",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build"
+  }
+}
