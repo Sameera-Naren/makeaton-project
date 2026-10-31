@@ -904,7 +904,7 @@ class Store {
   }
 
   // =========================================================================
-  // MEMBER 4: BILLING, PAYMENTS & ANALYTICS METHODS
+  // BILLING, PAYMENTS & ANALYTICS METHODS
   // =========================================================================
 
   getAllInvoices(filters?: { status?: string; customerId?: string; search?: string }): CustomerInvoice[] {

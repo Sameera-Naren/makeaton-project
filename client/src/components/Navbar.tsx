@@ -18,8 +18,8 @@ export const Navbar: React.FC = () => {
         { name: 'Billing Analytics', path: '/billing/analytics' },
         { name: 'Quotations', path: '/quotations' },
         { name: 'Subscriptions', path: '/subscriptions' },
-        { name: 'Invoices', path: '/invoices' },
-        { name: 'Payments', path: '/payments' },
+        { name: 'Invoices', path: '/billing/invoices' },
+        { name: 'Payments', path: '/billing/payments' },
       ]
     : [
         { name: 'Dashboard', path: '/' },

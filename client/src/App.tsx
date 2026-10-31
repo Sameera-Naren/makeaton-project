@@ -23,6 +23,22 @@ const DynamicDashboard: React.FC = () => {
   return <CustomerDashboard />;
 };
 
+const DynamicInvoices: React.FC = () => {
+  const { user } = useAuth();
+  if (user?.role === 'STAFF' || user?.role === 'ADMIN') {
+    return <BillingInvoicesPage />;
+  }
+  return <InvoicesPage />;
+};
+
+const DynamicPayments: React.FC = () => {
+  const { user } = useAuth();
+  if (user?.role === 'STAFF' || user?.role === 'ADMIN') {
+    return <BillingPaymentsPage />;
+  }
+  return <PaymentsPage />;
+};
+
 const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
 
@@ -147,7 +163,7 @@ export const App: React.FC = () => {
             path="/invoices"
             element={
               <ProtectedLayout>
-                <InvoicesPage />
+                <DynamicInvoices />
               </ProtectedLayout>
             }
           />
@@ -155,7 +171,7 @@ export const App: React.FC = () => {
             path="/payments"
             element={
               <ProtectedLayout>
-                <PaymentsPage />
+                <DynamicPayments />
               </ProtectedLayout>
             }
           />

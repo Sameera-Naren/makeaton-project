@@ -23,8 +23,10 @@ export const getCustomerDashboard = (req: AuthenticatedRequest, res: Response): 
 
 export const getCustomerSubscriptions = (req: AuthenticatedRequest, res: Response): void => {
   try {
-    const customerId = req.user!.id;
-    const subscriptions = dbStore.getCustomerSubscriptions(customerId);
+    const isStaffOrAdmin = req.user?.role === 'STAFF' || req.user?.role === 'ADMIN';
+    const subscriptions = isStaffOrAdmin
+      ? dbStore.subscriptions
+      : dbStore.getCustomerSubscriptions(req.user!.id);
 
     res.status(200).json({
       success: true,
@@ -57,8 +59,10 @@ export const getSubscriptionById = (req: AuthenticatedRequest, res: Response): v
 
 export const getCustomerInvoices = (req: AuthenticatedRequest, res: Response): void => {
   try {
-    const customerId = req.user!.id;
-    const invoices = dbStore.getCustomerInvoices(customerId);
+    const isStaffOrAdmin = req.user?.role === 'STAFF' || req.user?.role === 'ADMIN';
+    const invoices = isStaffOrAdmin
+      ? dbStore.invoices
+      : dbStore.getCustomerInvoices(req.user!.id);
 
     res.status(200).json({
       success: true,
@@ -91,8 +95,10 @@ export const getInvoiceById = (req: AuthenticatedRequest, res: Response): void =
 
 export const getCustomerPayments = (req: AuthenticatedRequest, res: Response): void => {
   try {
-    const customerId = req.user!.id;
-    const payments = dbStore.getCustomerPayments(customerId);
+    const isStaffOrAdmin = req.user?.role === 'STAFF' || req.user?.role === 'ADMIN';
+    const payments = isStaffOrAdmin
+      ? dbStore.payments
+      : dbStore.getCustomerPayments(req.user!.id);
 
     res.status(200).json({
       success: true,

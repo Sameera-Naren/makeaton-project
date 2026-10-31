@@ -288,7 +288,7 @@ export const BillingAnalyticsPage: React.FC = () => {
                 Monthly Recurring
               </span>
               <div className="my-4">
-                <span className="text-3xl sm:text-4xl font-extrabold text-zinc-950">₹{analytics.mrr.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                <span className="text-3xl sm:text-4xl font-extrabold text-zinc-950">₹${analytics.mrr.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
                 <p className="text-xs text-indigo-600 mt-1 font-medium">
                   ARR: ₹${(analytics.arr).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
@@ -309,7 +309,7 @@ export const BillingAnalyticsPage: React.FC = () => {
                 Revenue Collected
               </span>
               <div className="my-4">
-                <span className="text-3xl sm:text-4xl font-extrabold text-zinc-950">₹{analytics.totalRevenueCollected.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                <span className="text-3xl sm:text-4xl font-extrabold text-zinc-950">₹${analytics.totalRevenueCollected.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </span>
                 <p className="text-xs text-emerald-700 mt-1 font-medium">
                   {analytics.paidInvoicesCount} invoices cleared
@@ -330,7 +330,7 @@ export const BillingAnalyticsPage: React.FC = () => {
                 Outstanding Due
               </span>
               <div className="my-4">
-                <span className="text-3xl font-extrabold text-zinc-950">₹{analytics.outstandingReceivables.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                <span className="text-3xl font-extrabold text-zinc-950">₹${analytics.outstandingReceivables.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </span>
                 <p className="text-xs text-amber-700 mt-1 font-medium">
                   {analytics.overdueInvoicesCount > 0
@@ -379,7 +379,7 @@ export const BillingAnalyticsPage: React.FC = () => {
             <div className="w-12 h-12 rounded-2xl bg-amber-400 text-zinc-950 flex items-center justify-center font-bold text-xl flex-shrink-0">₹</div>
             <div>
               <h3 className="text-lg font-bold">Outstanding Customer Receivables</h3>
-              <p className="text-zinc-400 text-sm mt-0.5">₹{analytics.outstandingReceivables.toFixed(2)} in confirmed bills awaiting payment clearance.
+              <p className="text-zinc-400 text-sm mt-0.5">₹${analytics.outstandingReceivables.toFixed(2)} in confirmed bills awaiting payment clearance.
                 {analytics.overdueInvoicesCount > 0 && (
                   <span className="text-rose-400 ml-1 font-semibold">
                     ({analytics.overdueInvoicesCount} invoices are currently overdue).
@@ -448,7 +448,7 @@ export const BillingAnalyticsPage: React.FC = () => {
                   </div>
                   <div className="flex items-center justify-between text-xs text-zinc-700 font-medium">
                     <span>MRR Yield</span>
-                    <span className="font-bold text-zinc-950">₹{analytics.mrr.toFixed(2)} / mo</span>
+                    <span className="font-bold text-zinc-950">₹${analytics.mrr.toFixed(2)} / mo</span>
                   </div>
                   <button
                     onClick={() => setIsGenerateModalOpen(true)}
@@ -475,7 +475,7 @@ export const BillingAnalyticsPage: React.FC = () => {
                     <span className="text-xs font-bold text-zinc-900 uppercase tracking-wide">
                       Total Cleared
                     </span>
-                    <span className="text-sm font-extrabold text-zinc-950">₹{analytics.totalRevenueCollected.toFixed(2)}
+                    <span className="text-sm font-extrabold text-zinc-950">₹${analytics.totalRevenueCollected.toFixed(2)}
                     </span>
                   </div>
 
@@ -488,7 +488,7 @@ export const BillingAnalyticsPage: React.FC = () => {
                       return (
                         <div key={pm.method} className="flex items-center justify-between text-[11px] font-semibold text-zinc-800">
                           <span>{pm.method.replace('_', ' ')}</span>
-                          <span>₹{pm.amount.toFixed(0)} ({pct}%)</span>
+                          <span>₹${pm.amount.toFixed(0)} ({pct}%)</span>
                         </div>
                       );
                     })}
@@ -528,11 +528,11 @@ export const BillingAnalyticsPage: React.FC = () => {
 
                   <div className="grid grid-cols-2 gap-2 text-center text-xs">
                     <div className="p-2 rounded-xl bg-white/70 font-semibold text-emerald-800">
-                      <div>₹{analytics.invoicesByStatus.PAID.amount.toFixed(0)}</div>
+                      <div>₹${analytics.invoicesByStatus.PAID.amount.toFixed(0)}</div>
                       <span className="text-[10px] text-zinc-500 font-normal">Paid</span>
                     </div>
                     <div className="p-2 rounded-xl bg-white/70 font-semibold text-amber-800">
-                      <div>₹{analytics.invoicesByStatus.CONFIRMED.amount.toFixed(0)}</div>
+                      <div>₹${analytics.invoicesByStatus.CONFIRMED.amount.toFixed(0)}</div>
                       <span className="text-[10px] text-zinc-500 font-normal">Due</span>
                     </div>
                   </div>
@@ -618,7 +618,7 @@ export const BillingAnalyticsPage: React.FC = () => {
                           <span className="text-zinc-400 italic">Custom Bill</span>
                         )}
                       </td>
-                      <td className="py-4 px-6 text-zinc-700">₹{inv.subtotal.toFixed(2)}</td>
+                      <td className="py-4 px-6 text-zinc-700">₹${inv.subtotal.toFixed(2)}</td>
                       <td className="py-4 px-6 text-zinc-500">
                         <div>Tax: ₹${inv.taxAmount.toFixed(2)}</div>
                         {inv.discountAmount > 0 && (
@@ -628,7 +628,7 @@ export const BillingAnalyticsPage: React.FC = () => {
                         )}
                       </td>
                       <td className="py-4 px-6">
-                        <span className="font-extrabold text-zinc-950 text-sm">₹{inv.totalAmount.toFixed(2)}</span>
+                        <span className="font-extrabold text-zinc-950 text-sm">₹${inv.totalAmount.toFixed(2)}</span>
                       </td>
                       <td className="py-4 px-6">
                         <span
@@ -1054,9 +1054,9 @@ export const BillingAnalyticsPage: React.FC = () => {
                     <tr key={l.id}>
                       <td className="py-3 font-semibold text-zinc-900">{l.description}</td>
                       <td className="py-3 text-center text-zinc-600">{l.quantity}</td>
-                      <td className="py-3 text-right text-zinc-600">₹{l.unitPrice.toFixed(2)}</td>
+                      <td className="py-3 text-right text-zinc-600">₹${l.unitPrice.toFixed(2)}</td>
                       <td className="py-3 text-right text-zinc-600">{l.taxRate}%</td>
-                      <td className="py-3 text-right font-extrabold text-zinc-950">₹{l.amount.toFixed(2)}</td>
+                      <td className="py-3 text-right font-extrabold text-zinc-950">₹${l.amount.toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1067,21 +1067,21 @@ export const BillingAnalyticsPage: React.FC = () => {
               <div className="w-64 space-y-2 text-xs">
                 <div className="flex justify-between text-zinc-600">
                   <span>Subtotal:</span>
-                  <span className="font-semibold">₹{selectedInvoice.subtotal.toFixed(2)}</span>
+                  <span className="font-semibold">₹${selectedInvoice.subtotal.toFixed(2)}</span>
                 </div>
                 {selectedInvoice.discountAmount > 0 && (
                   <div className="flex justify-between text-emerald-600 font-semibold">
                     <span>Discount:</span>
-                    <span>-₹{selectedInvoice.discountAmount.toFixed(2)}</span>
+                    <span>-₹${selectedInvoice.discountAmount.toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-zinc-600">
                   <span>Tax Amount:</span>
-                  <span className="font-semibold">₹{selectedInvoice.taxAmount.toFixed(2)}</span>
+                  <span className="font-semibold">₹${selectedInvoice.taxAmount.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm font-extrabold text-zinc-950 pt-2 border-t border-zinc-200">
                   <span>Net Total:</span>
-                  <span>₹{selectedInvoice.totalAmount.toFixed(2)}</span>
+                  <span>₹${selectedInvoice.totalAmount.toFixed(2)}</span>
                 </div>
               </div>
             </div>

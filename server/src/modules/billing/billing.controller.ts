@@ -4,7 +4,7 @@ import { dbStore } from '../../lib/store.js';
 import { InvoiceStatus, PaymentMethod } from '../../types/index.js';
 
 /**
- * MEMBER 4: BILLING, PAYMENTS & ANALYTICS CONTROLLER
+ * BILLING, PAYMENTS & ANALYTICS CONTROLLER
  */
 
 // 1. Auto-generate invoice from active subscription
