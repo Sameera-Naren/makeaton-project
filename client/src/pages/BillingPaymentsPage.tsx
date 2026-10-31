@@ -93,12 +93,12 @@ export const BillingPaymentsPage: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-zinc-200">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-              Staff Billing Console
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-zinc-950 text-white tracking-wide">
+              SETTLEMENTS
             </span>
             <span className="text-xs text-zinc-400 font-medium">Payment Ledger & Receipts</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight mt-1">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-950 tracking-tight mt-2">
             Payments Ledger & Audit Trail
           </h1>
           <p className="text-sm text-zinc-500 mt-1">
@@ -109,50 +109,50 @@ export const BillingPaymentsPage: React.FC = () => {
         <div>
           <button
             onClick={() => setIsPayModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition"
+            className="flex items-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-zinc-950 hover:bg-zinc-800 rounded-full shadow-sm transition"
           >
-            <Plus className="w-4 h-4" />
-            Record Payment Remittance
+            <Plus className="w-4 h-4 text-emerald-400" />
+            <span>Record Payment Remittance</span>
           </button>
         </div>
       </div>
 
       {/* Overview Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm">
+        <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm">
           <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Total Volume Logged</div>
-          <div className="text-2xl font-extrabold text-zinc-900 mt-1">
+          <div className="text-3xl font-extrabold text-zinc-950 mt-2">
             ${totalVolume.toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </div>
-          <div className="text-xs text-emerald-600 mt-1 font-medium">100% Verified Receipts</div>
+          <div className="text-xs text-emerald-600 mt-1.5 font-semibold">100% Verified Receipts</div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm">
+        <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm">
           <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Completed Transactions</div>
-          <div className="text-2xl font-extrabold text-zinc-900 mt-1">{payments.length}</div>
-          <div className="text-xs text-zinc-500 mt-1">Across all registered channels</div>
+          <div className="text-3xl font-extrabold text-zinc-950 mt-2">{payments.length}</div>
+          <div className="text-xs text-zinc-500 mt-1.5 font-medium">Across all registered rails</div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-zinc-200 shadow-sm">
+        <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm">
           <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Avg Transaction Size</div>
-          <div className="text-2xl font-extrabold text-zinc-900 mt-1">
+          <div className="text-3xl font-extrabold text-zinc-950 mt-2">
             ${payments.length > 0 ? (totalVolume / payments.length).toFixed(2) : '0.00'}
           </div>
-          <div className="text-xs text-zinc-500 mt-1">Per cleared transaction</div>
+          <div className="text-xs text-zinc-500 mt-1.5 font-medium">Per cleared transaction</div>
         </div>
       </div>
 
       {/* Filter toolbar */}
-      <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
+      <div className="flex items-center justify-between bg-white p-4 rounded-3xl border border-zinc-200 shadow-sm">
         <div className="flex items-center gap-2 overflow-x-auto">
-          <span className="text-xs text-zinc-400 font-medium">Method:</span>
+          <span className="text-xs text-zinc-400 font-medium mr-1">Method:</span>
           {['ALL', 'CREDIT_CARD', 'BANK_TRANSFER', 'STRIPE', 'CASH', 'UPI'].map((m) => (
             <button
               key={m}
               onClick={() => setMethodFilter(m)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition whitespace-nowrap ${
                 methodFilter === m
-                  ? 'bg-zinc-900 text-white'
+                  ? 'bg-zinc-950 text-white'
                   : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
               }`}
             >
@@ -163,7 +163,7 @@ export const BillingPaymentsPage: React.FC = () => {
       </div>
 
       {/* Payments Table */}
-      <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-zinc-400 text-sm">Loading payments ledger...</div>
         ) : payments.length === 0 ? (
@@ -209,7 +209,7 @@ export const BillingPaymentsPage: React.FC = () => {
                     <td className="py-3.5 px-6 text-right">
                       <button
                         onClick={() => setSelectedReceipt(p)}
-                        className="px-2.5 py-1 rounded bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold text-[11px]"
+                        className="px-3.5 py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold text-xs transition"
                       >
                         Receipt
                       </button>
@@ -224,12 +224,12 @@ export const BillingPaymentsPage: React.FC = () => {
 
       {/* Record Payment Modal */}
       {isPayModalOpen && (
-        <div className="fixed inset-0 z-50 bg-zinc-950/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl">
-            <h3 className="font-bold text-zinc-900 text-base mb-4">Record Payment Remittance</h3>
+        <div className="fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl">
+            <h3 className="font-extrabold text-zinc-950 text-lg mb-4">Record Payment Remittance</h3>
             <form onSubmit={handleRecordPayment} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-zinc-700 mb-1">Target Invoice</label>
+                <label className="block font-bold text-zinc-800 mb-1.5">Target Invoice</label>
                 <select
                   value={payInvoiceId}
                   onChange={(e) => {
@@ -237,7 +237,7 @@ export const BillingPaymentsPage: React.FC = () => {
                     const inv = invoices.find((i) => i.id === e.target.value);
                     if (inv) setPayAmount(String(inv.totalAmount));
                   }}
-                  className="w-full p-2 border border-zinc-200 rounded-lg"
+                  className="w-full p-3 border border-zinc-200 rounded-2xl font-semibold"
                   required
                 >
                   <option value="">Select Invoice...</option>
@@ -253,23 +253,23 @@ export const BillingPaymentsPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-zinc-700 mb-1">Amount ($)</label>
+                  <label className="block font-bold text-zinc-800 mb-1.5">Amount ($)</label>
                   <input
                     type="number"
                     step="0.01"
                     min="1"
                     value={payAmount}
                     onChange={(e) => setPayAmount(e.target.value)}
-                    className="w-full p-2 border border-zinc-200 rounded-lg"
+                    className="w-full p-2.5 border border-zinc-200 rounded-2xl font-bold text-sm"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-zinc-700 mb-1">Payment Method</label>
+                  <label className="block font-bold text-zinc-800 mb-1.5">Payment Method</label>
                   <select
                     value={payMethod}
                     onChange={(e) => setPayMethod(e.target.value as PaymentMethod)}
-                    className="w-full p-2 border border-zinc-200 rounded-lg"
+                    className="w-full p-2.5 border border-zinc-200 rounded-2xl font-semibold"
                   >
                     <option value="CREDIT_CARD">Credit Card</option>
                     <option value="BANK_TRANSFER">Bank Wire</option>
@@ -281,27 +281,27 @@ export const BillingPaymentsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-zinc-700 mb-1">Reference / Note</label>
+                <label className="block font-bold text-zinc-800 mb-1.5">Reference / Note</label>
                 <input
                   type="text"
                   placeholder="e.g. Check #294 or Wire Ref ACH-99182"
                   value={payRefNote}
                   onChange={(e) => setPayRefNote(e.target.value)}
-                  className="w-full p-2 border border-zinc-200 rounded-lg"
+                  className="w-full p-2.5 border border-zinc-200 rounded-2xl"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex justify-end gap-3 pt-4 border-t border-zinc-100">
                 <button
                   type="button"
                   onClick={() => setIsPayModalOpen(false)}
-                  className="px-4 py-2 border rounded-lg font-medium"
+                  className="px-5 py-2.5 text-zinc-600 rounded-full font-semibold hover:bg-zinc-100"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-emerald-600 text-white rounded-lg font-semibold"
+                  className="px-6 py-2.5 bg-emerald-600 text-white rounded-full font-bold hover:bg-emerald-700"
                 >
                   Confirm Remittance
                 </button>
@@ -314,53 +314,53 @@ export const BillingPaymentsPage: React.FC = () => {
       {/* Printable Receipt Modal */}
       {selectedReceipt && (
         <div className="fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-zinc-200">
-            <div className="text-center pb-4 border-b border-zinc-200">
-              <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2">
-                <CheckCircle2 className="w-6 h-6" />
+          <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-zinc-200">
+            <div className="text-center pb-5 border-b border-zinc-200">
+              <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <CheckCircle2 className="w-7 h-7" />
               </div>
-              <h3 className="font-extrabold text-zinc-900 text-lg">Official Payment Receipt</h3>
-              <p className="text-xs text-zinc-400 mt-0.5">Brightloop Subscription Management Platform</p>
+              <h3 className="font-extrabold text-zinc-950 text-xl">Official Payment Receipt</h3>
+              <p className="text-xs text-zinc-400 mt-1">Brightloop Subscription Management Platform</p>
             </div>
 
-            <div className="my-5 space-y-3 text-xs">
+            <div className="my-6 space-y-3.5 text-xs">
               <div className="flex justify-between py-1 border-b border-zinc-100">
-                <span className="text-zinc-500">Receipt Voucher #</span>
-                <span className="font-mono font-bold text-zinc-900">{selectedReceipt.paymentNumber}</span>
+                <span className="text-zinc-500 font-medium">Receipt Voucher #</span>
+                <span className="font-mono font-bold text-zinc-950">{selectedReceipt.paymentNumber}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-zinc-100">
-                <span className="text-zinc-500">Settled Invoice #</span>
+                <span className="text-zinc-500 font-medium">Settled Invoice #</span>
                 <span className="font-semibold text-indigo-600">{selectedReceipt.invoiceNumber}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-zinc-100">
-                <span className="text-zinc-500">Timestamp</span>
+                <span className="text-zinc-500 font-medium">Timestamp</span>
                 <span className="font-medium text-zinc-700">{new Date(selectedReceipt.paymentDate).toLocaleString()}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-zinc-100">
-                <span className="text-zinc-500">Payment Channel</span>
-                <span className="font-semibold text-zinc-800">{selectedReceipt.paymentMethod}</span>
+                <span className="text-zinc-500 font-medium">Payment Rail</span>
+                <span className="font-bold text-zinc-900">{selectedReceipt.paymentMethod}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-zinc-100">
-                <span className="text-zinc-500">Reference Memo</span>
+                <span className="text-zinc-500 font-medium">Reference Memo</span>
                 <span className="text-zinc-600 italic">{selectedReceipt.referenceNote || 'N/A'}</span>
               </div>
-              <div className="flex justify-between py-2 text-base font-extrabold text-zinc-950 pt-3">
-                <span>Amount Remitted</span>
+              <div className="flex justify-between py-3 text-lg font-extrabold text-zinc-950 pt-3">
+                <span>Amount Cleared</span>
                 <span className="text-emerald-600">${selectedReceipt.amount.toFixed(2)}</span>
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <button
                 onClick={() => window.print()}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 border border-zinc-300 rounded-xl text-xs font-semibold text-zinc-700 hover:bg-zinc-50"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 border border-zinc-300 rounded-full text-xs font-semibold text-zinc-700 hover:bg-zinc-50"
               >
                 <Printer className="w-4 h-4" />
                 Print Voucher
               </button>
               <button
                 onClick={() => setSelectedReceipt(null)}
-                className="flex-1 py-2 bg-zinc-900 text-white rounded-xl text-xs font-semibold"
+                className="flex-1 py-2.5 bg-zinc-950 text-white rounded-full text-xs font-bold hover:bg-zinc-800"
               >
                 Done
               </button>

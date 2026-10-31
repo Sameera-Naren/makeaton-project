@@ -42,7 +42,7 @@ const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
       <footer className="border-t border-zinc-200/80 bg-white py-6 text-center text-xs text-zinc-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>Brightloop Software Platform — Hackathon 2026 Edition</span>
-          <span className="text-zinc-400">Team Modular Monolith • Member 1 & Member 4 Active</span>
+          <span className="text-zinc-400">Enterprise Cloud Subscription Platform • Secure Billing Engine</span>
         </div>
       </footer>
     </div>

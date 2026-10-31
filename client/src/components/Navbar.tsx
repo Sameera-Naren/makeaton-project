@@ -37,8 +37,8 @@ export const Navbar: React.FC = () => {
           <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span className="font-semibold text-zinc-100">Brightloop Subscription Platform</span>
           <span className="hidden sm:inline text-zinc-500">|</span>
-          <span className="hidden sm:inline text-indigo-400 font-medium">
-            Member 4 Module: Billing, Payments & Analytics Active
+          <span className="hidden sm:inline text-zinc-400 font-medium">
+            Enterprise Subscription & Revenue Engine
           </span>
         </div>
         <div className="flex items-center gap-2">

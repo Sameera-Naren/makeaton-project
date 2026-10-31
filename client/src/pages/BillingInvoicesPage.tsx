@@ -175,13 +175,13 @@ export const BillingInvoicesPage: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-zinc-200">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800">
-              Staff Billing Console
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-zinc-950 text-white tracking-wide">
+              ACCOUNTS RECEIVABLE
             </span>
-            <span className="text-xs text-zinc-400">Lifecycle Management</span>
+            <span className="text-xs text-zinc-400 font-medium">Lifecycle Management</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight mt-1">
-            Invoices & Accounts Receivable
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-950 tracking-tight mt-2">
+            Invoices & Billing Portfolio
           </h1>
           <p className="text-sm text-zinc-500 mt-1">
             Generate recurring customer bills, monitor due dates, and update statuses.
@@ -191,43 +191,43 @@ export const BillingInvoicesPage: React.FC = () => {
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => setIsManualModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-zinc-700 bg-white border border-zinc-300 hover:bg-zinc-50 rounded-lg shadow-sm transition"
+            className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-zinc-700 bg-white border border-zinc-200 hover:border-zinc-300 rounded-full shadow-sm transition"
           >
             <Plus className="w-4 h-4 text-zinc-500" />
-            + Manual Invoice
+            <span>Custom Bill</span>
           </button>
           <button
             onClick={() => setIsGenerateModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition"
+            className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-zinc-950 hover:bg-zinc-800 rounded-full shadow-sm transition"
           >
-            <Zap className="w-4 h-4" />
-            Auto-Generate from Sub
+            <Zap className="w-4 h-4 text-amber-300" />
+            <span>Auto-Generate Invoice</span>
           </button>
         </div>
       </div>
 
       {/* Filters & Search Toolbar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-3xl border border-zinc-200 shadow-sm">
         <form onSubmit={handleSearchSubmit} className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-zinc-400 absolute left-4 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Search invoice #, sub #, or memo..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-xs border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-10 pr-4 py-2.5 text-xs border border-zinc-200 rounded-full focus:outline-none focus:ring-2 focus:ring-zinc-950 font-medium"
           />
         </form>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-          <span className="text-xs text-zinc-400 font-medium whitespace-nowrap">Filter:</span>
+        <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+          <span className="text-xs text-zinc-400 font-medium whitespace-nowrap mr-1">Status:</span>
           {['ALL', 'CONFIRMED', 'PAID', 'OVERDUE', 'DRAFT', 'CANCELLED'].map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition whitespace-nowrap ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition whitespace-nowrap ${
                 statusFilter === st
-                  ? 'bg-zinc-900 text-white'
+                  ? 'bg-zinc-950 text-white'
                   : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
               }`}
             >
@@ -238,7 +238,7 @@ export const BillingInvoicesPage: React.FC = () => {
       </div>
 
       {/* Invoices Table */}
-      <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-zinc-400 text-sm">Loading invoice portfolio...</div>
         ) : invoices.length === 0 ? (
@@ -312,7 +312,7 @@ export const BillingInvoicesPage: React.FC = () => {
                     <td className="py-3.5 px-6 text-right space-x-1.5 whitespace-nowrap">
                       <button
                         onClick={() => setSelectedInvoice(inv)}
-                        className="px-2.5 py-1 rounded bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-[11px] font-semibold transition"
+                        className="px-3 py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-semibold transition"
                       >
                         Inspect
                       </button>
@@ -324,16 +324,16 @@ export const BillingInvoicesPage: React.FC = () => {
                             setPayAmount(String(inv.totalAmount));
                             setIsPayModalOpen(true);
                           }}
-                          className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold transition"
+                          className="px-3.5 py-1.5 rounded-full bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-semibold transition shadow-sm"
                         >
-                          Record Pay
+                          Pay
                         </button>
                       )}
 
                       <select
                         value={inv.status}
                         onChange={(e) => handleStatusChange(inv.id, e.target.value as InvoiceStatus)}
-                        className="px-1.5 py-1 text-[11px] bg-white border border-zinc-200 rounded font-medium text-zinc-700"
+                        className="px-2 py-1 text-xs bg-white border border-zinc-200 rounded-lg font-medium text-zinc-700 focus:outline-none"
                       >
                         <option value="DRAFT">Draft</option>
                         <option value="CONFIRMED">Confirmed</option>
@@ -353,10 +353,10 @@ export const BillingInvoicesPage: React.FC = () => {
       {/* Inspect Modal */}
       {selectedInvoice && (
         <div className="fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full p-8 shadow-2xl border border-zinc-200">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-8 shadow-2xl border border-zinc-200">
             <div className="flex items-start justify-between pb-6 border-b border-zinc-200">
               <div>
-                <div className="text-xl font-extrabold text-zinc-950">
+                <div className="text-2xl font-extrabold text-zinc-950 font-mono">
                   {selectedInvoice.invoiceNumber}
                 </div>
                 <div className="text-xs text-zinc-500 mt-1">
@@ -366,7 +366,7 @@ export const BillingInvoicesPage: React.FC = () => {
               </div>
               <button
                 onClick={() => setSelectedInvoice(null)}
-                className="text-zinc-400 hover:text-zinc-700 font-bold text-lg"
+                className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-500 hover:bg-zinc-100 font-bold"
               >
                 ✕
               </button>
@@ -375,22 +375,22 @@ export const BillingInvoicesPage: React.FC = () => {
             <div className="mt-6">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-zinc-200 text-zinc-500">
-                    <th className="py-2">Description</th>
-                    <th className="py-2 text-center">Qty</th>
-                    <th className="py-2 text-right">Unit Price</th>
-                    <th className="py-2 text-right">Tax</th>
-                    <th className="py-2 text-right">Total</th>
+                  <tr className="border-b border-zinc-200 text-zinc-500 font-semibold">
+                    <th className="py-2.5">Description</th>
+                    <th className="py-2.5 text-center">Qty</th>
+                    <th className="py-2.5 text-right">Unit Price</th>
+                    <th className="py-2.5 text-right">Tax</th>
+                    <th className="py-2.5 text-right">Total</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
                   {selectedInvoice.lines.map((l) => (
                     <tr key={l.id}>
-                      <td className="py-2.5 font-medium text-zinc-900">{l.description}</td>
-                      <td className="py-2.5 text-center text-zinc-600">{l.quantity}</td>
-                      <td className="py-2.5 text-right text-zinc-600">${l.unitPrice.toFixed(2)}</td>
-                      <td className="py-2.5 text-right text-zinc-600">{l.taxRate}%</td>
-                      <td className="py-2.5 text-right font-semibold text-zinc-900">${l.amount.toFixed(2)}</td>
+                      <td className="py-3 font-semibold text-zinc-900">{l.description}</td>
+                      <td className="py-3 text-center text-zinc-600">{l.quantity}</td>
+                      <td className="py-3 text-right text-zinc-600">${l.unitPrice.toFixed(2)}</td>
+                      <td className="py-3 text-right text-zinc-600">{l.taxRate}%</td>
+                      <td className="py-3 text-right font-extrabold text-zinc-950">${l.amount.toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -398,13 +398,13 @@ export const BillingInvoicesPage: React.FC = () => {
             </div>
 
             <div className="mt-6 pt-4 border-t border-zinc-200 flex justify-end">
-              <div className="w-64 space-y-1.5 text-xs">
+              <div className="w-64 space-y-2 text-xs">
                 <div className="flex justify-between text-zinc-600">
                   <span>Subtotal:</span>
                   <span className="font-semibold">${selectedInvoice.subtotal.toFixed(2)}</span>
                 </div>
                 {selectedInvoice.discountAmount > 0 && (
-                  <div className="flex justify-between text-emerald-600">
+                  <div className="flex justify-between text-emerald-600 font-semibold">
                     <span>Discount:</span>
                     <span>-${selectedInvoice.discountAmount.toFixed(2)}</span>
                   </div>
@@ -420,10 +420,17 @@ export const BillingInvoicesPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex justify-between items-center pt-4 border-t border-zinc-100">
+              <button
+                onClick={() => window.print()}
+                className="flex items-center gap-1.5 px-4 py-2.5 border border-zinc-300 rounded-full text-xs font-semibold text-zinc-700 hover:bg-zinc-50"
+              >
+                <Printer className="w-4 h-4" />
+                <span>Print</span>
+              </button>
               <button
                 onClick={() => setSelectedInvoice(null)}
-                className="px-5 py-2 bg-zinc-900 text-white rounded-xl text-xs font-semibold"
+                className="px-6 py-2.5 bg-zinc-950 text-white rounded-full text-xs font-bold hover:bg-zinc-800"
               >
                 Close
               </button>
@@ -434,16 +441,16 @@ export const BillingInvoicesPage: React.FC = () => {
 
       {/* Generate Modal */}
       {isGenerateModalOpen && (
-        <div className="fixed inset-0 z-50 bg-zinc-950/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl">
-            <h3 className="font-bold text-zinc-900 text-base mb-4">Generate Invoice from Subscription</h3>
+        <div className="fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl">
+            <h3 className="font-extrabold text-zinc-950 text-lg mb-4">Generate Recurring Invoice</h3>
             <form onSubmit={handleGenerateInvoice} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-zinc-700 mb-1">Subscription</label>
+                <label className="block font-bold text-zinc-800 mb-1.5">Subscription</label>
                 <select
                   value={genSubId}
                   onChange={(e) => setGenSubId(e.target.value)}
-                  className="w-full p-2 border border-zinc-200 rounded-lg"
+                  className="w-full p-3 border border-zinc-200 rounded-2xl font-semibold"
                   required
                 >
                   {subscriptions.map((s) => (
@@ -456,40 +463,40 @@ export const BillingInvoicesPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-zinc-700 mb-1">Due Date</label>
+                  <label className="block font-bold text-zinc-800 mb-1.5">Due Date</label>
                   <input
                     type="date"
                     value={genDueDate}
                     onChange={(e) => setGenDueDate(e.target.value)}
-                    className="w-full p-2 border border-zinc-200 rounded-lg"
+                    className="w-full p-2.5 border border-zinc-200 rounded-2xl font-medium"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-zinc-700 mb-1">Discount (%)</label>
+                  <label className="block font-bold text-zinc-800 mb-1.5">Discount (%)</label>
                   <input
                     type="number"
                     min="0"
                     max="100"
                     value={genDiscountPercent}
                     onChange={(e) => setGenDiscountPercent(e.target.value)}
-                    className="w-full p-2 border border-zinc-200 rounded-lg"
+                    className="w-full p-2.5 border border-zinc-200 rounded-2xl font-medium"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex justify-end gap-3 pt-4 border-t border-zinc-100">
                 <button
                   type="button"
                   onClick={() => setIsGenerateModalOpen(false)}
-                  className="px-4 py-2 border rounded-lg font-medium"
+                  className="px-5 py-2.5 text-zinc-600 rounded-full font-semibold hover:bg-zinc-100"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-indigo-600 text-white rounded-lg font-semibold"
+                  className="px-6 py-2.5 bg-zinc-950 text-white rounded-full font-bold hover:bg-zinc-800"
                 >
-                  Generate
+                  Generate Invoice
                 </button>
               </div>
             </form>
@@ -499,30 +506,30 @@ export const BillingInvoicesPage: React.FC = () => {
 
       {/* Manual Payment Modal */}
       {isPayModalOpen && payTargetInvoice && (
-        <div className="fixed inset-0 z-50 bg-zinc-950/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl">
-            <h3 className="font-bold text-zinc-900 text-base mb-4">
+        <div className="fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl">
+            <h3 className="font-extrabold text-zinc-950 text-lg mb-4">
               Record Payment: {payTargetInvoice.invoiceNumber}
             </h3>
             <form onSubmit={handleRecordPayment} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-zinc-700 mb-1">Amount ($)</label>
+                  <label className="block font-bold text-zinc-800 mb-1.5">Amount ($)</label>
                   <input
                     type="number"
                     step="0.01"
                     value={payAmount}
                     onChange={(e) => setPayAmount(e.target.value)}
-                    className="w-full p-2 border border-zinc-200 rounded-lg"
+                    className="w-full p-2.5 border border-zinc-200 rounded-2xl font-bold text-sm"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-zinc-700 mb-1">Payment Channel</label>
+                  <label className="block font-bold text-zinc-800 mb-1.5">Payment Channel</label>
                   <select
                     value={payMethod}
                     onChange={(e) => setPayMethod(e.target.value as PaymentMethod)}
-                    className="w-full p-2 border border-zinc-200 rounded-lg"
+                    className="w-full p-2.5 border border-zinc-200 rounded-2xl font-semibold"
                   >
                     <option value="CREDIT_CARD">Credit Card</option>
                     <option value="BANK_TRANSFER">Bank Wire</option>
@@ -534,29 +541,29 @@ export const BillingInvoicesPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-zinc-700 mb-1">Note / Reference</label>
+                <label className="block font-bold text-zinc-800 mb-1.5">Note / Reference</label>
                 <input
                   type="text"
                   placeholder="e.g. Wire check #488"
                   value={payRefNote}
                   onChange={(e) => setPayRefNote(e.target.value)}
-                  className="w-full p-2 border border-zinc-200 rounded-lg"
+                  className="w-full p-2.5 border border-zinc-200 rounded-2xl"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex justify-end gap-3 pt-4 border-t border-zinc-100">
                 <button
                   type="button"
                   onClick={() => setIsPayModalOpen(false)}
-                  className="px-4 py-2 border rounded-lg font-medium"
+                  className="px-5 py-2.5 text-zinc-600 rounded-full font-semibold hover:bg-zinc-100"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-emerald-600 text-white rounded-lg font-semibold"
+                  className="px-6 py-2.5 bg-emerald-600 text-white rounded-full font-bold hover:bg-emerald-700"
                 >
-                  Save Payment
+                  Confirm Remittance
                 </button>
               </div>
             </form>
@@ -566,71 +573,71 @@ export const BillingInvoicesPage: React.FC = () => {
 
       {/* Manual Ad-Hoc Modal */}
       {isManualModalOpen && (
-        <div className="fixed inset-0 z-50 bg-zinc-950/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl">
-            <h3 className="font-bold text-zinc-900 text-base mb-4">Create Manual Invoice</h3>
+        <div className="fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl">
+            <h3 className="font-extrabold text-zinc-950 text-lg mb-4">Create Manual Invoice</h3>
             <form onSubmit={handleManualInvoice} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-zinc-700 mb-1">Description</label>
+                <label className="block font-bold text-zinc-800 mb-1.5">Description</label>
                 <input
                   type="text"
-                  placeholder="e.g. Infrastructure Setup Services"
+                  placeholder="e.g. Cloud Infrastructure Setup Services"
                   value={manDesc}
                   onChange={(e) => setManDesc(e.target.value)}
-                  className="w-full p-2 border border-zinc-200 rounded-lg"
+                  className="w-full p-2.5 border border-zinc-200 rounded-2xl font-medium"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block font-semibold text-zinc-700 mb-1">Quantity</label>
+                  <label className="block font-bold text-zinc-800 mb-1.5">Quantity</label>
                   <input
                     type="number"
                     min="1"
                     value={manQty}
                     onChange={(e) => setManQty(e.target.value)}
-                    className="w-full p-2 border border-zinc-200 rounded-lg"
+                    className="w-full p-2.5 border border-zinc-200 rounded-2xl"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-zinc-700 mb-1">Unit Price ($)</label>
+                  <label className="block font-bold text-zinc-800 mb-1.5">Unit Price ($)</label>
                   <input
                     type="number"
                     min="0"
                     step="0.01"
                     value={manPrice}
                     onChange={(e) => setManPrice(e.target.value)}
-                    className="w-full p-2 border border-zinc-200 rounded-lg"
+                    className="w-full p-2.5 border border-zinc-200 rounded-2xl font-semibold"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-zinc-700 mb-1">Tax (%)</label>
+                  <label className="block font-bold text-zinc-800 mb-1.5">Tax (%)</label>
                   <input
                     type="number"
                     min="0"
                     value={manTax}
                     onChange={(e) => setManTax(e.target.value)}
-                    className="w-full p-2 border border-zinc-200 rounded-lg"
+                    className="w-full p-2.5 border border-zinc-200 rounded-2xl"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex justify-end gap-3 pt-4 border-t border-zinc-100">
                 <button
                   type="button"
                   onClick={() => setIsManualModalOpen(false)}
-                  className="px-4 py-2 border rounded-lg font-medium"
+                  className="px-5 py-2.5 text-zinc-600 rounded-full font-semibold hover:bg-zinc-100"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-indigo-600 text-white rounded-lg font-semibold"
+                  className="px-6 py-2.5 bg-zinc-950 text-white rounded-full font-bold hover:bg-zinc-800"
                 >
-                  Create
+                  Create Invoice
                 </button>
               </div>
             </form>
