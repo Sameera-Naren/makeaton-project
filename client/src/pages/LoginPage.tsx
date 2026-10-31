@@ -77,7 +77,7 @@ export const LoginPage: React.FC = () => {
     if (!forgotEmail) return;
     try {
       const res = await api.auth.forgotPassword(forgotEmail);
-      setForgotFeedback(res.message || 'Password reset link sent to your registered email.');
+      setForgotFeedback((res as any)?.message || res || 'Password reset link sent to your registered email.');
     } catch (err: any) {
       setForgotFeedback(err.message || 'Failed to dispatch reset email.');
     }

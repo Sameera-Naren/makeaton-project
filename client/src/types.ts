@@ -12,7 +12,7 @@ export interface User {
 
 export type Frequency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
 export type SubscriptionStatus = 'DRAFT' | 'QUOTATION' | 'CONFIRMED' | 'ACTIVE' | 'PAUSED' | 'CLOSED';
-export type QuotationStatus = 'DRAFT' | 'SENT' | 'CONFIRMED' | 'CONVERTED' | 'EXPIRED';
+export type QuotationStatus = 'DRAFT' | 'SENT' | 'CONFIRMED' | 'ACCEPTED' | 'REJECTED' | 'CONVERTED' | 'EXPIRED';
 export type InvoiceStatus = 'DRAFT' | 'CONFIRMED' | 'PAID' | 'OVERDUE' | 'CANCELLED';
 export type PaymentMethod = 'CREDIT_CARD' | 'BANK_TRANSFER' | 'STRIPE' | 'CASH' | 'UPI';
 export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
@@ -33,6 +33,7 @@ export interface CustomerSubscription {
   customerId: string;
   customerName?: string;
   customerCompany?: string;
+  customerEmail?: string;
   quotationId?: string;
   quotationNumber?: string;
   planName: string;
@@ -44,19 +45,28 @@ export interface CustomerSubscription {
   autoRenew: boolean;
   notes?: string;
   totalAmount: number;
+  totalPrice?: number;
+  planPrice?: number;
+  nextBillingDate?: string;
+  variants?: Array<{
+    name: string;
+    type?: string;
+    quantity: number;
+    priceModifier: number;
+  }>;
   lines: SubscriptionLineItem[];
 }
 
 export interface QuotationLineItem {
-  id: string;
-  productId: string;
+  id?: string;
+  productId?: string;
   productName: string;
   variantId?: string;
   variantName?: string;
   quantity: number;
   unitPrice: number;
-  taxRate: number;
-  discount: number;
+  taxRate?: number;
+  discount?: number;
   amount: number;
 }
 
@@ -67,20 +77,21 @@ export interface Quotation {
   customerName?: string;
   customerCompany?: string;
   customerEmail?: string;
-  planId: string;
+  planId?: string;
   planName?: string;
   validUntil: string;
-  subtotal: number;
-  taxAmount: number;
-  discountAmount: number;
+  subtotal?: number;
+  taxAmount?: number;
+  discountAmount?: number;
   totalAmount: number;
   status: QuotationStatus;
   notes?: string;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
   subscriptionId?: string;
   subscriptionNumber?: string;
-  lines: QuotationLineItem[];
+  lines?: QuotationLineItem[];
+  items?: QuotationLineItem[];
 }
 
 export interface InvoiceLineItem {
@@ -161,4 +172,66 @@ export interface BillingAnalytics {
   }[];
   recentInvoices: CustomerInvoice[];
   recentPayments: CustomerPayment[];
+}
+
+export type DiscountType = 'PERCENTAGE' | 'FIXED';
+
+export interface ProductVariant {
+  id: string;
+  productId: string;
+  name: string;
+  priceAdjustment: number;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  type: string;
+  salesPrice: number;
+  costPrice: number;
+  notes?: string;
+  isActive: boolean;
+  variants: ProductVariant[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Plan {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  billingFrequency: Frequency;
+  minQuantity: number;
+  startDate?: string;
+  endDate?: string;
+  autoClose: boolean;
+  canPause: boolean;
+  canRenew: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DiscountRule {
+  id: string;
+  code: string;
+  description?: string;
+  type: DiscountType;
+  value: number;
+  minPurchase?: number;
+  startDate?: string;
+  endDate?: string;
+  maxUsage?: number;
+  timesUsed: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface DiscountValidationResult {
+  valid: boolean;
+  discountAmount: number;
+  finalAmount: number;
+  rule?: DiscountRule;
+  error?: string;
 }

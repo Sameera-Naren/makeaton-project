@@ -17,6 +17,7 @@ interface AuthContextType {
     role?: Role;
   }) => Promise<void>;
   logout: () => void;
+  quickDemoLogin: (role: Role) => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
 
@@ -79,6 +80,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
+  // Instant 1-click Demo Accounts for hackathon presentations
+  const quickDemoLogin = async (role: Role) => {
+    let email = 'customer@brightloop.com';
+    let password = 'Password@123';
+
+    if (role === 'STAFF') {
+      email = 'staff@brightloop.com';
+      password = 'Staff@12345';
+    } else if (role === 'ADMIN') {
+      email = 'admin@brightloop.com';
+      password = 'Admin@12345';
+    }
+
+    await login(email, password);
+  };
+
   const refreshProfile = async () => {
     try {
       const updated = await api.customer.getProfile();
@@ -97,6 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         register,
         logout,
+        quickDemoLogin,
         refreshProfile,
       }}
     >
