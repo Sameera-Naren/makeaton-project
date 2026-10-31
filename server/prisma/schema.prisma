@@ -1,0 +1,320 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -------------------------------------------------------------
+// ENUMS
+// -------------------------------------------------------------
+
+enum Role {
+  ADMIN
+  STAFF
+  CUSTOMER
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  CONVERTED
+  EXPIRED
+}
+
+enum SubscriptionStatus {
+  DRAFT
+  QUOTATION
+  CONFIRMED
+  ACTIVE
+  PAUSED
+  CLOSED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  CONFIRMED
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  BANK_TRANSFER
+  STRIPE
+  CASH
+  UPI
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+// -------------------------------------------------------------
+// MODULE 1: AUTHENTICATION & CUSTOMER (MEMBER 1)
+// -------------------------------------------------------------
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  passwordHash  String
+  name          String
+  companyName   String?
+  role          Role           @default(CUSTOMER)
+  phone         String?
+  address       String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  // Relationships
+  subscriptions Subscription[]
+  invoices      Invoice[]
+  payments      Payment[]
+  quotations    Quotation[]
+
+  @@map("users")
+}
+
+// -------------------------------------------------------------
+// MODULE 2: PRODUCTS, PLANS & DISCOUNTS (MEMBER 2)
+// -------------------------------------------------------------
+
+model Product {
+  id               String            @id @default(uuid())
+  name             String
+  type             String            // e.g. "Software", "Service", "Add-on"
+  salesPrice       Float
+  costPrice        Float
+  notes            String?
+  isActive         Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  variants         ProductVariant[]
+  subscriptionLines SubscriptionLine[]
+  invoiceLines     InvoiceLine[]
+  quotationLines   QuotationLine[]
+
+  @@map("products")
+}
+
+model ProductVariant {
+  id              String            @id @default(uuid())
+  productId       String
+  product         Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name            String            // e.g. "Odoo Brand Edition", "Enterprise Tier"
+  priceAdjustment Float             @default(0.0)
+
+  subscriptionLines SubscriptionLine[]
+
+  @@map("product_variants")
+}
+
+model Plan {
+  id               String            @id @default(uuid())
+  name             String
+  description      String?
+  price            Float
+  billingFrequency Frequency         @default(MONTHLY)
+  minQuantity      Int               @default(1)
+  startDate        DateTime?
+  endDate          DateTime?
+  autoClose        Boolean           @default(false)
+  canPause         Boolean           @default(true)
+  canRenew         Boolean           @default(true)
+  isActive         Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  subscriptions    Subscription[]
+  quotationTemplates QuotationTemplate[]
+  quotations       Quotation[]
+
+  @@map("plans")
+}
+
+model DiscountRule {
+  id          String       @id @default(uuid())
+  code        String       @unique
+  description String?
+  type        DiscountType @default(PERCENTAGE)
+  value       Float        // 10% or $50
+  minPurchase Float?
+  startDate   DateTime?
+  endDate     DateTime?
+  maxUsage    Int?
+  timesUsed   Int          @default(0)
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+
+  @@map("discount_rules")
+}
+
+// -------------------------------------------------------------
+// MODULE 3: QUOTATIONS & SUBSCRIPTIONS (MEMBER 3)
+// -------------------------------------------------------------
+
+model QuotationTemplate {
+  id        String   @id @default(uuid())
+  name      String
+  planId    String
+  plan      Plan     @relation(fields: [planId], references: [id])
+  validDays Int      @default(30)
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@map("quotation_templates")
+}
+
+model Quotation {
+  id              String          @id @default(uuid())
+  quotationNumber String          @unique
+  customerId      String
+  customer        User            @relation(fields: [customerId], references: [id])
+  planId          String
+  plan            Plan            @relation(fields: [planId], references: [id])
+  validUntil      DateTime
+  totalAmount     Float           @default(0.0)
+  status          QuotationStatus @default(DRAFT)
+  notes           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  lines           QuotationLine[]
+  subscription    Subscription?
+
+  @@map("quotations")
+}
+
+model QuotationLine {
+  id          String    @id @default(uuid())
+  quotationId String
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id])
+  quantity    Int       @default(1)
+  unitPrice   Float
+  taxRate     Float     @default(0.0)
+  amount      Float
+
+  @@map("quotation_lines")
+}
+
+model Subscription {
+  id                 String             @id @default(uuid())
+  subscriptionNumber String             @unique
+  customerId         String
+  customer           User               @relation(fields: [customerId], references: [id])
+  planId             String
+  plan               Plan               @relation(fields: [planId], references: [id])
+  quotationId        String?            @unique
+  quotation          Quotation?         @relation(fields: [quotationId], references: [id])
+  startDate          DateTime           @default(now())
+  expiryDate         DateTime?
+  paymentTerms       String             @default("Net 15")
+  status             SubscriptionStatus @default(ACTIVE)
+  autoRenew          Boolean            @default(true)
+  notes              String?
+  totalAmount        Float              @default(0.0)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  lines              SubscriptionLine[]
+  invoices           Invoice[]
+
+  @@map("subscriptions")
+}
+
+model SubscriptionLine {
+  id             String          @id @default(uuid())
+  subscriptionId String
+  subscription   Subscription    @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product         @relation(fields: [productId], references: [id])
+  variantId      String?
+  variant        ProductVariant? @relation(fields: [variantId], references: [id])
+  quantity       Int             @default(1)
+  unitPrice      Float
+  taxRate        Float           @default(0.0)
+  amount         Float
+
+  @@map("subscription_lines")
+}
+
+// -------------------------------------------------------------
+// MODULE 4: BILLING, PAYMENTS & ANALYTICS (MEMBER 4)
+// -------------------------------------------------------------
+
+model Invoice {
+  id             String        @id @default(uuid())
+  invoiceNumber  String        @unique
+  customerId     String
+  customer       User          @relation(fields: [customerId], references: [id])
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+  issueDate      DateTime      @default(now())
+  dueDate        DateTime
+  subtotal       Float         @default(0.0)
+  taxAmount      Float         @default(0.0)
+  discountAmount Float         @default(0.0)
+  totalAmount    Float         @default(0.0)
+  status         InvoiceStatus @default(DRAFT)
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  lines          InvoiceLine[]
+  payments       Payment[]
+
+  @@map("invoices")
+}
+
+model InvoiceLine {
+  id          String   @id @default(uuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id])
+  description String
+  quantity    Int      @default(1)
+  unitPrice   Float
+  taxRate     Float    @default(0.0)
+  amount      Float
+
+  @@map("invoice_lines")
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  paymentNumber String        @unique
+  invoiceId     String
+  invoice       Invoice       @relation(fields: [invoiceId], references: [id])
+  customerId    String
+  customer      User          @relation(fields: [customerId], references: [id])
+  amount        Float
+  paymentMethod PaymentMethod @default(CREDIT_CARD)
+  paymentDate   DateTime      @default(now())
+  status        PaymentStatus @default(COMPLETED)
+  referenceNote String?
+  createdAt     DateTime      @default(now())
+
+  @@map("payments")
+}

@@ -1,104 +1,88 @@
 # Brightloop Software – Subscription Management System
+**Make-A-Ton Virtual Round Hackathon Project**
 
-A centralized subscription management platform for Brightloop Software, built during Make-A-Ton hackathon.
-
----
-
-## Team Structure
-
-| Member | Module |
-|--------|--------|
-| Member 1 | Authentication & Customer Portal |
-| Member 2 | Products, Plans & Discounts |
-| **Member 3** | **Quotations & Subscription Management** |
-| Member 4 | Billing, Payments & Analytics |
+A centralized subscription management platform for Brightloop Software, built by a team of four during Make-A-Ton hackathon.
 
 ---
 
-## Tech Stack
+## 👥 Team Structure & Ownership
 
-- **Frontend**: React + TypeScript + Vite
-- **Backend**: Node.js + Express + TypeScript
-- **Database**: PostgreSQL
-- **ORM**: Prisma 5
-- **Styling**: Vanilla CSS (dark mode design system)
-- **API**: REST
-
----
-
-## Project Structure
-
-```
-makeaton/
-├── frontend/    ← React + Vite app (port 5173)
-└── backend/     ← Express API (port 4000)
-    └── prisma/  ← Schema and migrations
-```
+| Member | Module | Status |
+|--------|--------|--------|
+| **Member 1** | Authentication & Customer Portal | Implemented (`client/`, `server/`) |
+| **Member 2** | Products, Plans & Discounts | Planned / In Progress |
+| **Member 3** | **Quotations & Subscription Management** | **Integrated & Active** (`feature/quotations-subscriptions`) |
+| **Member 4** | Billing, Payments & Analytics | Planned / In Progress |
 
 ---
 
-## Quick Start
+## 🏗️ Architecture & Technology Stack
 
-### Prerequisites
+- **Monorepo Structure**:
+  - `client/` — React + TypeScript + Vite + Tailwind CSS
+  - `server/` — Node.js + Express + TypeScript + Prisma
+- **Database**: PostgreSQL with Prisma ORM (plus fallback store for demo)
+- **UI Design System**: Tailwind CSS, Lucide Icons, Pastel Accent Visuals
+
+---
+
+## 🚀 Quick Start
+
+### 1. Prerequisites
 - Node.js 18+
-- PostgreSQL running locally
+- npm or pnpm
+- PostgreSQL (optional for local DB; in-memory store available for rapid demo)
 
-### 1. Database Setup
-
-Create the database:
-```sql
-CREATE DATABASE brightloop_db;
-```
-
-### 2. Backend Setup
+### 2. Setup & Installation
 
 ```bash
-cd backend
-cp .env.example .env
-# Edit .env with your PostgreSQL credentials
-
+# Install root dependencies
 npm install
-npm run db:generate     # Generate Prisma client
-npm run db:migrate      # Run migrations (creates tables)
-npm run dev             # Start backend on http://localhost:4000
+
+# Start both backend and frontend concurrently
+npm run dev
 ```
 
-### 3. Frontend Setup
+Or run individually:
 
 ```bash
-cd frontend
+# Server (Backend on port 5000)
+cd server
 npm install
-npm run dev             # Start frontend on http://localhost:5173
+npm run dev
+
+# Client (Frontend on port 5173)
+cd client
+npm install
+npm run dev
 ```
 
 ---
 
-## Member 3 – API Endpoints
+## 📋 Member 3 – Quotations & Subscriptions API
 
 ### Quotations
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | /api/quotations | List all quotations |
-| GET | /api/quotations/:id | Get quotation details |
-| POST | /api/quotations | Create quotation with items |
-| PATCH | /api/quotations/:id | Update draft quotation |
-| POST | /api/quotations/:id/confirm | Confirm a draft quotation |
-| POST | /api/quotations/:id/convert | Convert to subscription |
+| GET | `/api/subscriptions/quotations` | List quotations with filters |
+| GET | `/api/subscriptions/quotations/:id` | Get quotation details |
+| POST | `/api/subscriptions/quotations` | Create quotation with products & plans |
+| POST | `/api/subscriptions/quotations/:id/confirm` | Confirm a draft quotation |
+| POST | `/api/subscriptions/quotations/:id/convert` | Convert quotation to active subscription |
 
 ### Subscriptions
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | /api/subscriptions | List all subscriptions |
-| GET | /api/subscriptions/:id | Get subscription details |
-| PATCH | /api/subscriptions/:id/status | Update status (generic) |
-| POST | /api/subscriptions/:id/pause | Pause subscription |
-| POST | /api/subscriptions/:id/resume | Resume subscription |
-| POST | /api/subscriptions/:id/close | Close subscription |
+| GET | `/api/subscriptions/all` | List all subscriptions (Staff/Admin) |
+| GET | `/api/subscriptions/:id` | Get subscription details & line items |
+| PUT | `/api/subscriptions/:id/status` | Update subscription lifecycle status |
+| POST | `/api/subscriptions/:id/pause` | Pause subscription |
+| POST | `/api/subscriptions/:id/resume` | Resume subscription |
+| POST | `/api/subscriptions/:id/close` | Close subscription |
 
 ---
 
-## Branch Strategy
+## 🌿 Branch Strategy
 
-- `main` — stable, reviewed code only
-- `feature/quotations-subscriptions` — Member 3 active branch
-- Each member works on their own feature branch
+- `main` — production / consolidated team branch
+- `feature/quotations-subscriptions` — Member 3 feature branch
