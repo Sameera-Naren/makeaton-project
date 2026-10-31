@@ -94,7 +94,7 @@ model User {
 }
 
 // -------------------------------------------------------------
-// MODULE 2: PRODUCTS, PLANS & DISCOUNTS (MEMBER 2)
+// MODULE: PRODUCTS, PLANS & DISCOUNTS
 // -------------------------------------------------------------
 
 model Product {

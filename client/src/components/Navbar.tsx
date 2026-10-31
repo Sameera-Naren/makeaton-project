@@ -4,18 +4,20 @@ import { useAuth } from '../context/AuthContext';
 import { LogOut, ShieldCheck, UserCheck, Layers } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, quickDemoLogin } = useAuth();
   const navigate = useNavigate();
-  const isStaffOrAdmin = user?.role === 'STAFF' || user?.role === 'ADMIN';
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
+  const isStaffOrAdmin = user?.role === 'STAFF' || user?.role === 'ADMIN';
+
   const navLinks = isStaffOrAdmin
     ? [
         { name: 'Billing Analytics', path: '/billing/analytics' },
+        { name: 'Products & Plans', path: '/products' },
         { name: 'Quotations', path: '/quotations' },
         { name: 'Subscriptions', path: '/subscriptions' },
         { name: 'Invoices', path: '/invoices' },
@@ -23,6 +25,7 @@ export const Navbar: React.FC = () => {
       ]
     : [
         { name: 'Dashboard', path: '/' },
+        { name: 'Products & Plans', path: '/products' },
         { name: 'Subscriptions', path: '/subscriptions' },
         { name: 'Invoices', path: '/invoices' },
         { name: 'Payments', path: '/payments' },
@@ -31,6 +34,50 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-zinc-100">
+      {/* Top Demo Bar for Hackathon judges & reviewers */}
+      <div className="bg-zinc-900 text-zinc-300 px-4 py-1.5 text-xs flex flex-wrap items-center justify-between border-b border-zinc-800">
+        <div className="flex items-center gap-2">
+          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="font-semibold text-zinc-100">Brightloop Subscription Platform</span>
+          <span className="hidden sm:inline text-zinc-500">|</span>
+          <span className="hidden sm:inline text-zinc-400">Full-Stack Modular Architecture</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-zinc-400">Quick Switch:</span>
+          <button
+            onClick={() => quickDemoLogin('CUSTOMER')}
+            className={`px-2 py-0.5 rounded text-[11px] font-medium transition ${
+              user?.role === 'CUSTOMER'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+            }`}
+          >
+            Customer (Alex)
+          </button>
+          <button
+            onClick={() => quickDemoLogin('STAFF')}
+            className={`px-2 py-0.5 rounded text-[11px] font-medium transition ${
+              user?.role === 'STAFF'
+                ? 'bg-amber-600 text-white'
+                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+            }`}
+          >
+            Staff (Sarah)
+          </button>
+          <button
+            onClick={() => quickDemoLogin('ADMIN')}
+            className={`px-2 py-0.5 rounded text-[11px] font-medium transition ${
+              user?.role === 'ADMIN'
+                ? 'bg-purple-600 text-white'
+                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+            }`}
+          >
+            Admin (Marcus)
+          </button>
+        </div>
+      </div>
+
+      {/* Main Header */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <NavLink to="/" className="flex items-center gap-2 group">
@@ -48,15 +95,15 @@ export const Navbar: React.FC = () => {
           </NavLink>
         </div>
 
-        <nav className="hidden md:flex items-center gap-7">
+        <nav className="hidden md:flex items-center gap-6">
           {navLinks.map((link) => (
             <NavLink
               key={link.path}
               to={link.path}
               className={({ isActive }) =>
-                `text-sm font-semibold transition-colors flex items-center gap-1.5 ${
+                `text-xs lg:text-sm font-medium transition-colors ${
                   isActive
-                    ? 'text-zinc-950 font-bold'
+                    ? 'text-zinc-950 font-semibold border-b-2 border-zinc-900 pb-1'
                     : 'text-zinc-500 hover:text-zinc-900'
                 }`
               }
@@ -90,3 +137,5 @@ export const Navbar: React.FC = () => {
     </header>
   );
 };
+
+export default Navbar;

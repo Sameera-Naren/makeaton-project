@@ -5,10 +5,17 @@ import {
   CustomerInvoice,
   CustomerPayment,
   CustomerSubscription,
+  DiscountRule,
+  DiscountType,
+  DiscountValidationResult,
+  Frequency,
   InvoiceLineItem,
   InvoiceStatus,
   PaymentMethod,
   PaymentStatus,
+  Plan,
+  Product,
+  ProductVariant,
   Quotation,
   QuotationStatus,
   Role,
@@ -26,6 +33,9 @@ class Store {
   subscriptions: CustomerSubscription[] = [];
   invoices: CustomerInvoice[] = [];
   payments: CustomerPayment[] = [];
+  products: Product[] = [];
+  plans: Plan[] = [];
+  discountRules: DiscountRule[] = [];
   quotations: Quotation[] = [];
 
   constructor() {
@@ -178,6 +188,210 @@ class Store {
     ];
 
     // Seed Quotations
+    // Seed Products & Product Variants
+    this.products = [
+      {
+        id: 'prod-001',
+        name: 'Core ERP Software Base',
+        type: 'Software',
+        salesPrice: 300.0,
+        costPrice: 50.0,
+        notes: 'Base enterprise platform with inventory, CRM, financial ledger, and multi-currency accounting.',
+        isActive: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        variants: [
+          { id: 'var-001', productId: 'prod-001', name: 'Standard Edition', priceAdjustment: 0.0 },
+          { id: 'var-002', productId: 'prod-001', name: 'Odoo Brand Edition', priceAdjustment: 560.0 },
+          { id: 'var-003', productId: 'prod-001', name: 'Multi-Company Enterprise', priceAdjustment: 850.0 },
+        ],
+      },
+      {
+        id: 'prod-002',
+        name: 'Staff User Seats (Concurrent)',
+        type: 'License',
+        salesPrice: 35.0,
+        costPrice: 5.0,
+        notes: 'Per-user recurring seat with granular role-based permissions and session auditing.',
+        isActive: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        variants: [
+          { id: 'var-004', productId: 'prod-002', name: 'Standard User Seat', priceAdjustment: 0.0 },
+          { id: 'var-005', productId: 'prod-002', name: 'Read-Only Auditor Seat', priceAdjustment: -15.0 },
+          { id: 'var-006', productId: 'prod-002', name: 'Executive Power User Seat', priceAdjustment: 25.0 },
+        ],
+      },
+      {
+        id: 'prod-003',
+        name: 'Advanced Financial Analytics Module',
+        type: 'Add-on',
+        salesPrice: 210.0,
+        costPrice: 30.0,
+        notes: 'Real-time financial BI dashboards, revenue recognition, and predictive cash flow modeling.',
+        isActive: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        variants: [
+          { id: 'var-007', productId: 'prod-003', name: 'Standard BI Reporting', priceAdjustment: 0.0 },
+          { id: 'var-008', productId: 'prod-003', name: 'Full Multi-Currency Pack', priceAdjustment: 90.0 },
+        ],
+      },
+      {
+        id: 'prod-004',
+        name: 'Cloud Vault Backup Tier',
+        type: 'Service',
+        salesPrice: 450.0,
+        costPrice: 60.0,
+        notes: 'Continuous geo-redundant snapshot storage with point-in-time recovery and compliance retention.',
+        isActive: true,
+        createdAt: '2026-01-10T00:00:00.000Z',
+        updatedAt: '2026-01-10T00:00:00.000Z',
+        variants: [
+          { id: 'var-009', productId: 'prod-004', name: '1TB Standard Storage', priceAdjustment: 0.0 },
+          { id: 'var-010', productId: 'prod-004', name: '2TB Hot Encrypted Tier', priceAdjustment: 400.0 },
+          { id: 'var-011', productId: 'prod-004', name: '5TB Multi-Region Vault', priceAdjustment: 950.0 },
+        ],
+      },
+      {
+        id: 'prod-005',
+        name: '24/7 SLA Dedicated Support Engineer',
+        type: 'Service',
+        salesPrice: 500.0,
+        costPrice: 150.0,
+        notes: 'Guaranteed 15-minute response time SLA and direct escalation engineering line.',
+        isActive: true,
+        createdAt: '2026-01-15T00:00:00.000Z',
+        updatedAt: '2026-01-15T00:00:00.000Z',
+        variants: [
+          { id: 'var-012', productId: 'prod-005', name: 'Business Hours Only', priceAdjustment: -200.0 },
+          { id: 'var-013', productId: 'prod-005', name: '24/7/365 Dedicated Escort', priceAdjustment: 0.0 },
+        ],
+      },
+    ];
+
+    // Seed Subscription Plans & Billing Configuration
+    this.plans = [
+      {
+        id: 'plan-001',
+        name: 'Brightloop Starter Suite',
+        description: 'Essential operations suite designed for growing startups, small teams, and boutique agencies.',
+        price: 199.0,
+        billingFrequency: 'MONTHLY',
+        minQuantity: 1,
+        autoClose: false,
+        canPause: true,
+        canRenew: true,
+        isActive: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+      {
+        id: 'plan-002',
+        name: 'Brightloop Enterprise Cloud Suite',
+        description: 'Flagship enterprise bundle: Core ERP platform, 10 user seats, financial BI reporting, and premium SLA.',
+        price: 1420.0,
+        billingFrequency: 'MONTHLY',
+        minQuantity: 5,
+        autoClose: false,
+        canPause: true,
+        canRenew: true,
+        isActive: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+      {
+        id: 'plan-003',
+        name: 'Secure Cloud Automated Backup & DR',
+        description: 'Annual enterprise disaster recovery, automated immutable backup replication, and security compliance.',
+        price: 850.0,
+        billingFrequency: 'YEARLY',
+        minQuantity: 1,
+        autoClose: false,
+        canPause: false,
+        canRenew: true,
+        isActive: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+      {
+        id: 'plan-004',
+        name: 'Rapid Sprint DevOps Cluster',
+        description: 'Weekly burst compute cluster and isolated testing bench for fast-paced feature releases.',
+        price: 80.0,
+        billingFrequency: 'WEEKLY',
+        minQuantity: 1,
+        autoClose: true,
+        canPause: true,
+        canRenew: false,
+        isActive: true,
+        createdAt: '2026-02-01T00:00:00.000Z',
+        updatedAt: '2026-02-01T00:00:00.000Z',
+      },
+      {
+        id: 'plan-005',
+        name: 'Pay-As-You-Go Daily Standby',
+        description: 'Daily elastic provisioning for seasonal staff surges, event workloads, and sandbox demonstrations.',
+        price: 15.0,
+        billingFrequency: 'DAILY',
+        minQuantity: 1,
+        autoClose: false,
+        canPause: true,
+        canRenew: true,
+        isActive: true,
+        createdAt: '2026-02-15T00:00:00.000Z',
+        updatedAt: '2026-02-15T00:00:00.000Z',
+      },
+    ];
+
+    // Seed Discount Rules
+    this.discountRules = [
+      {
+        id: 'disc-001',
+        code: 'WELCOME2026',
+        description: 'Welcome promotion granting 10% off subscriptions with minimum purchase of $500.',
+        type: 'PERCENTAGE',
+        value: 10.0,
+        minPurchase: 500.0,
+        startDate: '2026-01-01T00:00:00.000Z',
+        endDate: '2026-12-31T23:59:59.000Z',
+        maxUsage: 100,
+        timesUsed: 14,
+        isActive: true,
+        createdAt: '2026-01-01T00:00:00.000Z',
+      },
+      {
+        id: 'disc-002',
+        code: 'FLAT100OFF',
+        description: 'Direct $100 concession on enterprise subscriptions valued at $1,000 or greater.',
+        type: 'FIXED',
+        value: 100.0,
+        minPurchase: 1000.0,
+        startDate: '2026-01-01T00:00:00.000Z',
+        endDate: '2026-12-31T23:59:59.000Z',
+        maxUsage: 50,
+        timesUsed: 7,
+        isActive: true,
+        createdAt: '2026-01-05T00:00:00.000Z',
+      },
+      {
+        id: 'disc-003',
+        code: 'HACKATHON25',
+        description: 'Exclusive 25% discount voucher for live hackathon showcase and partner deployments.',
+        type: 'PERCENTAGE',
+        value: 25.0,
+        minPurchase: 200.0,
+        startDate: '2026-02-01T00:00:00.000Z',
+        endDate: '2026-12-31T23:59:59.000Z',
+        maxUsage: 500,
+        timesUsed: 42,
+        isActive: true,
+        createdAt: '2026-02-01T00:00:00.000Z',
+      },
+    ];
+
+    // Seed Initial Quotations
+    
     this.quotations = [
       {
         id: 'quo-001',
@@ -524,7 +738,10 @@ class Store {
   // QUOTATIONS METHODS
   // ==========================================
 
-  getQuotations(filters?: { status?: string; customerId?: string }): Quotation[] {
+  getQuotations(filters?: { status?: string; customerId?: string } | string): Quotation[] {
+    if (typeof filters === 'string') {
+      return this.quotations.filter((q) => q.customerId === filters);
+    }
     return this.quotations.filter((q) => {
       const matchStatus = !filters?.status || filters.status === 'ALL' || q.status === filters.status;
       const matchCustomer = !filters?.customerId || q.customerId === filters.customerId;
@@ -685,17 +902,6 @@ class Store {
     return q;
   }
 
-  confirmQuotation(id: string): Quotation {
-    const q = this.getQuotationById(id);
-    if (!q) throw new Error(`Quotation '${id}' not found`);
-    if (q.status !== 'DRAFT') {
-      throw new Error(`Only DRAFT quotations can be confirmed. Current status: ${q.status}`);
-    }
-
-    q.status = 'CONFIRMED';
-    q.updatedAt = new Date().toISOString();
-    return q;
-  }
 
   convertQuotationToSubscription(id: string): {
     quotation: Quotation;
@@ -734,13 +940,13 @@ class Store {
       autoRenew: true,
       notes: `Generated from Quotation ${q.quotationNumber}. ${q.notes || ''}`,
       totalAmount: q.totalAmount,
-      lines: q.lines.map((ql, i) => ({
+      lines: (q.lines || []).map((ql, i) => ({
         id: `subl-${Date.now()}-${i}`,
         productName: ql.productName,
         variantName: ql.variantName,
         quantity: ql.quantity,
         unitPrice: ql.unitPrice,
-        taxRate: ql.taxRate,
+        taxRate: ql.taxRate || 0,
         amount: ql.amount,
       })),
     };
@@ -904,7 +1110,7 @@ class Store {
   }
 
   // =========================================================================
-  // MEMBER 4: BILLING, PAYMENTS & ANALYTICS METHODS
+  // BILLING, PAYMENTS & ANALYTICS METHODS
   // =========================================================================
 
   getAllInvoices(filters?: { status?: string; customerId?: string; search?: string }): CustomerInvoice[] {
@@ -1204,6 +1410,486 @@ class Store {
       recentPayments: this.payments.slice(0, 5),
     };
   }
+
+
+
+  sendQuotation(id: string): Quotation {
+    const q = this.getQuotationById(id);
+    if (!q) throw new Error(`Quotation '${id}' not found`);
+    q.status = 'SENT';
+    q.updatedAt = new Date().toISOString();
+    return q;
+  }
+
+  confirmQuotation(id: string): { quotation: Quotation; subscription: CustomerSubscription } {
+    const q = this.getQuotationById(id);
+    if (!q) throw new Error(`Quotation '${id}' not found`);
+    q.status = 'CONFIRMED';
+    q.updatedAt = new Date().toISOString();
+    return this.convertQuotationToSubscription(id);
+  }
+
+  deleteQuotation(id: string): Quotation {
+    const index = this.quotations.findIndex((q) => q.id === id || q.quotationNumber === id);
+    if (index === -1) throw new Error(`Quotation '${id}' not found`);
+    const [deleted] = this.quotations.splice(index, 1);
+    return deleted;
+  }
+
+
+getProducts(filters?: { search?: string; type?: string; activeOnly?: boolean }): Product[] {
+    let result = [...this.products];
+
+    if (filters?.activeOnly) {
+      result = result.filter((p) => p.isActive);
+    }
+
+    if (filters?.type && filters.type !== 'ALL') {
+      result = result.filter((p) => p.type.toLowerCase() === filters.type!.toLowerCase());
+    }
+
+    if (filters?.search && filters.search.trim()) {
+      const q = filters.search.trim().toLowerCase();
+      result = result.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.type.toLowerCase().includes(q) ||
+          (p.notes && p.notes.toLowerCase().includes(q)) ||
+          p.variants.some((v) => v.name.toLowerCase().includes(q))
+      );
+    }
+
+    return result;
+  }
+
+  getProductById(id: string): Product | null {
+    const product = this.products.find((p) => p.id === id);
+    return product || null;
+  }
+
+  createProduct(data: {
+    name: string;
+    type: string;
+    salesPrice: number;
+    costPrice: number;
+    notes?: string;
+    isActive?: boolean;
+    variants?: Array<{ name: string; priceAdjustment: number }>;
+  }): Product {
+    const productId = `prod-${Date.now().toString().slice(-6)}`;
+    const now = new Date().toISOString();
+
+    const variants: ProductVariant[] = (data.variants || []).map((v, idx) => ({
+      id: `var-${Date.now().toString().slice(-6)}-${idx + 1}`,
+      productId,
+      name: v.name,
+      priceAdjustment: Number(v.priceAdjustment) || 0,
+    }));
+
+    const product: Product = {
+      id: productId,
+      name: data.name.trim(),
+      type: data.type.trim() || 'Software',
+      salesPrice: Number(data.salesPrice) || 0,
+      costPrice: Number(data.costPrice) || 0,
+      notes: data.notes || '',
+      isActive: data.isActive !== undefined ? data.isActive : true,
+      variants,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    this.products.unshift(product);
+    return product;
+  }
+
+  updateProduct(
+    id: string,
+    data: Partial<Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'variants'>>
+  ): Product | null {
+    const product = this.getProductById(id);
+    if (!product) return null;
+
+    if (data.name !== undefined) product.name = data.name.trim();
+    if (data.type !== undefined) product.type = data.type.trim();
+    if (data.salesPrice !== undefined) product.salesPrice = Number(data.salesPrice);
+    if (data.costPrice !== undefined) product.costPrice = Number(data.costPrice);
+    if (data.notes !== undefined) product.notes = data.notes;
+    if (data.isActive !== undefined) product.isActive = Boolean(data.isActive);
+    product.updatedAt = new Date().toISOString();
+
+    return product;
+  }
+
+  deleteProduct(id: string): boolean {
+    const index = this.products.findIndex((p) => p.id === id);
+    if (index === -1) return false;
+    this.products.splice(index, 1);
+    return true;
+  }
+
+  addVariant(productId: string, data: { name: string; priceAdjustment: number }): ProductVariant | null {
+    const product = this.getProductById(productId);
+    if (!product) return null;
+
+    const variant: ProductVariant = {
+      id: `var-${Date.now().toString().slice(-6)}`,
+      productId,
+      name: data.name.trim(),
+      priceAdjustment: Number(data.priceAdjustment) || 0,
+    };
+
+    product.variants.push(variant);
+    product.updatedAt = new Date().toISOString();
+    return variant;
+  }
+
+  updateVariant(
+    productId: string,
+    variantId: string,
+    data: { name?: string; priceAdjustment?: number }
+  ): ProductVariant | null {
+    const product = this.getProductById(productId);
+    if (!product) return null;
+
+    const variant = product.variants.find((v) => v.id === variantId);
+    if (!variant) return null;
+
+    if (data.name !== undefined) variant.name = data.name.trim();
+    if (data.priceAdjustment !== undefined) variant.priceAdjustment = Number(data.priceAdjustment);
+    product.updatedAt = new Date().toISOString();
+
+    return variant;
+  }
+
+  deleteVariant(productId: string, variantId: string): boolean {
+    const product = this.getProductById(productId);
+    if (!product) return false;
+
+    const index = product.variants.findIndex((v) => v.id === variantId);
+    if (index === -1) return false;
+
+    product.variants.splice(index, 1);
+    product.updatedAt = new Date().toISOString();
+    return true;
+  }
+
+  // -------------------------------------------------------------
+  // SUBSCRIPTION PLANS METHODS
+  // -------------------------------------------------------------
+
+  getPlans(filters?: { frequency?: Frequency; activeOnly?: boolean }): Plan[] {
+    let result = [...this.plans];
+
+    if (filters?.activeOnly) {
+      result = result.filter((p) => p.isActive);
+    }
+
+    if (filters?.frequency) {
+      result = result.filter((p) => p.billingFrequency === filters.frequency);
+    }
+
+    return result;
+  }
+
+  getPlanById(id: string): Plan | null {
+    const plan = this.plans.find((p) => p.id === id);
+    return plan || null;
+  }
+
+  createPlan(data: Omit<Plan, 'id' | 'createdAt' | 'updatedAt'>): Plan {
+    const planId = `plan-${Date.now().toString().slice(-6)}`;
+    const now = new Date().toISOString();
+
+    const plan: Plan = {
+      id: planId,
+      name: data.name.trim(),
+      description: data.description || '',
+      price: Number(data.price) || 0,
+      billingFrequency: data.billingFrequency || 'MONTHLY',
+      minQuantity: Number(data.minQuantity) || 1,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      autoClose: Boolean(data.autoClose),
+      canPause: data.canPause !== undefined ? Boolean(data.canPause) : true,
+      canRenew: data.canRenew !== undefined ? Boolean(data.canRenew) : true,
+      isActive: data.isActive !== undefined ? Boolean(data.isActive) : true,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    this.plans.unshift(plan);
+    return plan;
+  }
+
+  updatePlan(id: string, data: Partial<Omit<Plan, 'id' | 'createdAt' | 'updatedAt'>>): Plan | null {
+    const plan = this.getPlanById(id);
+    if (!plan) return null;
+
+    if (data.name !== undefined) plan.name = data.name.trim();
+    if (data.description !== undefined) plan.description = data.description;
+    if (data.price !== undefined) plan.price = Number(data.price);
+    if (data.billingFrequency !== undefined) plan.billingFrequency = data.billingFrequency;
+    if (data.minQuantity !== undefined) plan.minQuantity = Number(data.minQuantity);
+    if (data.startDate !== undefined) plan.startDate = data.startDate;
+    if (data.endDate !== undefined) plan.endDate = data.endDate;
+    if (data.autoClose !== undefined) plan.autoClose = Boolean(data.autoClose);
+    if (data.canPause !== undefined) plan.canPause = Boolean(data.canPause);
+    if (data.canRenew !== undefined) plan.canRenew = Boolean(data.canRenew);
+    if (data.isActive !== undefined) plan.isActive = Boolean(data.isActive);
+    plan.updatedAt = new Date().toISOString();
+
+    return plan;
+  }
+
+  deletePlan(id: string): boolean {
+    const index = this.plans.findIndex((p) => p.id === id);
+    if (index === -1) return false;
+    this.plans.splice(index, 1);
+    return true;
+  }
+
+  // -------------------------------------------------------------
+  // DISCOUNT RULES & PROMOTIONS METHODS
+  // -------------------------------------------------------------
+
+  getDiscountRules(activeOnly?: boolean): DiscountRule[] {
+    let result = [...this.discountRules];
+    if (activeOnly) {
+      result = result.filter((r) => r.isActive);
+    }
+    return result;
+  }
+
+  getDiscountRuleById(id: string): DiscountRule | null {
+    return this.discountRules.find((r) => r.id === id) || null;
+  }
+
+  getDiscountRuleByCode(code: string): DiscountRule | null {
+    const q = code.trim().toUpperCase();
+    return this.discountRules.find((r) => r.code.toUpperCase() === q) || null;
+  }
+
+  createDiscountRule(data: Omit<DiscountRule, 'id' | 'createdAt' | 'timesUsed'>): DiscountRule {
+    const existing = this.getDiscountRuleByCode(data.code);
+    if (existing) {
+      throw new Error(`Discount rule with promo code '${data.code.toUpperCase()}' already exists.`);
+    }
+
+    const rule: DiscountRule = {
+      id: `disc-${Date.now().toString().slice(-6)}`,
+      code: data.code.trim().toUpperCase(),
+      description: data.description || '',
+      type: data.type || 'PERCENTAGE',
+      value: Number(data.value) || 0,
+      minPurchase: data.minPurchase !== undefined ? Number(data.minPurchase) : undefined,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      maxUsage: data.maxUsage !== undefined ? Number(data.maxUsage) : undefined,
+      timesUsed: 0,
+      isActive: data.isActive !== undefined ? Boolean(data.isActive) : true,
+      createdAt: new Date().toISOString(),
+    };
+
+    this.discountRules.unshift(rule);
+    return rule;
+  }
+
+  updateDiscountRule(
+    id: string,
+    data: Partial<Omit<DiscountRule, 'id' | 'createdAt' | 'timesUsed'>>
+  ): DiscountRule | null {
+    const rule = this.getDiscountRuleById(id);
+    if (!rule) return null;
+
+    if (data.code !== undefined) {
+      const formattedCode = data.code.trim().toUpperCase();
+      const existing = this.getDiscountRuleByCode(formattedCode);
+      if (existing && existing.id !== id) {
+        throw new Error(`Discount rule with code '${formattedCode}' already exists.`);
+      }
+      rule.code = formattedCode;
+    }
+    if (data.description !== undefined) rule.description = data.description;
+    if (data.type !== undefined) rule.type = data.type;
+    if (data.value !== undefined) rule.value = Number(data.value);
+    if (data.minPurchase !== undefined) rule.minPurchase = Number(data.minPurchase);
+    if (data.startDate !== undefined) rule.startDate = data.startDate;
+    if (data.endDate !== undefined) rule.endDate = data.endDate;
+    if (data.maxUsage !== undefined) rule.maxUsage = Number(data.maxUsage);
+    if (data.isActive !== undefined) rule.isActive = Boolean(data.isActive);
+
+    return rule;
+  }
+
+  deleteDiscountRule(id: string): boolean {
+    const index = this.discountRules.findIndex((r) => r.id === id);
+    if (index === -1) return false;
+    this.discountRules.splice(index, 1);
+    return true;
+  }
+
+  validateDiscount(code: string, purchaseAmount: number): DiscountValidationResult {
+    const rule = this.getDiscountRuleByCode(code);
+    if (!rule) {
+      return {
+        valid: false,
+        discountAmount: 0,
+        finalAmount: purchaseAmount,
+        error: `Promo code '${code.toUpperCase()}' is invalid or does not exist.`,
+      };
+    }
+
+    if (!rule.isActive) {
+      return {
+        valid: false,
+        discountAmount: 0,
+        finalAmount: purchaseAmount,
+        rule,
+        error: `Promo code '${rule.code}' is currently inactive.`,
+      };
+    }
+
+    const now = new Date();
+    if (rule.startDate && new Date(rule.startDate) > now) {
+      return {
+        valid: false,
+        discountAmount: 0,
+        finalAmount: purchaseAmount,
+        rule,
+        error: `Promo code '${rule.code}' is not yet active.`,
+      };
+    }
+
+    if (rule.endDate && new Date(rule.endDate) < now) {
+      return {
+        valid: false,
+        discountAmount: 0,
+        finalAmount: purchaseAmount,
+        rule,
+        error: `Promo code '${rule.code}' has expired.`,
+      };
+    }
+
+    if (rule.maxUsage && rule.timesUsed >= rule.maxUsage) {
+      return {
+        valid: false,
+        discountAmount: 0,
+        finalAmount: purchaseAmount,
+        rule,
+        error: `Promo code '${rule.code}' has reached its maximum usage limit.`,
+      };
+    }
+
+    if (rule.minPurchase && purchaseAmount < rule.minPurchase) {
+      return {
+        valid: false,
+        discountAmount: 0,
+        finalAmount: purchaseAmount,
+        rule,
+        error: `Minimum purchase of $${rule.minPurchase.toFixed(2)} is required to use '${rule.code}'.`,
+      };
+    }
+
+    let discountAmount = 0;
+    if (rule.type === 'PERCENTAGE') {
+      discountAmount = (purchaseAmount * rule.value) / 100;
+    } else {
+      discountAmount = Math.min(rule.value, purchaseAmount);
+    }
+
+    discountAmount = Math.round(discountAmount * 100) / 100;
+    const finalAmount = Math.max(0, Math.round((purchaseAmount - discountAmount) * 100) / 100);
+
+    return {
+      valid: true,
+      discountAmount,
+      finalAmount,
+      rule,
+    };
+  }
+
+  // -------------------------------------------------------------
+  // ALL SUBSCRIPTIONS & QUOTATIONS (STAFF & CUSTOMER RBAC)
+  // -------------------------------------------------------------
+
+  
+
+createQuotationRequest(data: {
+    customerId: string;
+    customerName: string;
+    customerEmail: string;
+    planName?: string;
+    notes: string;
+    estimatedAmount?: number;
+    items?: Array<{ productName: string; variantName?: string; quantity: number; unitPrice: number; amount: number }>;
+  }): Quotation {
+    const quotationNumber = `QUO-${Date.now().toString().slice(-6)}`;
+    const now = new Date();
+    const validUntil = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    const quote: Quotation = {
+      id: `quo-${Date.now().toString().slice(-6)}`,
+      quotationNumber,
+      customerId: data.customerId,
+      customerName: data.customerName,
+      customerEmail: data.customerEmail,
+      planName: data.planName || 'Custom Enterprise Configuration',
+      totalAmount: data.estimatedAmount || 0,
+      status: 'SENT',
+      notes: data.notes,
+      items: data.items || [],
+      validUntil,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+    };
+
+    this.quotations.unshift(quote);
+    return quote;
+  }
+
+  prepareStaffQuotation(data: {
+    customerId: string;
+    planName: string;
+    totalAmount: number;
+    notes?: string;
+    validDays?: number;
+    items?: Array<{ productName: string; variantName?: string; quantity: number; unitPrice: number; amount: number }>;
+  }): Quotation {
+    const customer = this.findUserById(data.customerId);
+    const quotationNumber = `QUO-${Date.now().toString().slice(-6)}`;
+    const now = new Date();
+    const days = data.validDays || 30;
+    const validUntil = new Date(now.getTime() + days * 24 * 60 * 60 * 1000).toISOString();
+
+    const quote: Quotation = {
+      id: `quo-${Date.now().toString().slice(-6)}`,
+      quotationNumber,
+      customerId: data.customerId,
+      customerName: customer ? customer.name : 'Valued Customer',
+      customerEmail: customer ? customer.email : '',
+      planName: data.planName,
+      totalAmount: Number(data.totalAmount) || 0,
+      status: 'DRAFT',
+      notes: data.notes || '',
+      items: data.items || [],
+      validUntil,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+    };
+
+    this.quotations.unshift(quote);
+    return quote;
+  }
+
+  updateQuotationStatus(id: string, status: QuotationStatus): Quotation | null {
+    const quote = this.getQuotationById(id);
+    if (!quote) return null;
+    quote.status = status;
+    quote.updatedAt = new Date().toISOString();
+    return quote;
+  }
+
 }
 
 export const dbStore = new Store();

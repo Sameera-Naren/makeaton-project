@@ -37,7 +37,7 @@ Simple Modular Monolith with:
 
 ---
 
-### **Member 2 (Products, Plans & Discounts)**
+### **Products, Plans & Discounts (Implemented)**
 - **Backend Folder:** `server/src/modules/products/`
 - **Routes to implement:**
   - `GET /api/products` — List all products with variants (e.g. Odoo brand +$560)

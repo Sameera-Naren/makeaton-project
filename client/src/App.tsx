@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
 import { CustomerDashboard } from './pages/CustomerDashboard';
+import { ProductsPage } from './pages/ProductsPage';
 import { SubscriptionsPage } from './pages/SubscriptionsPage';
 import { InvoicesPage } from './pages/InvoicesPage';
 import { PaymentsPage } from './pages/PaymentsPage';
@@ -46,7 +47,7 @@ const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>Brightloop Software Platform — Hackathon 2026 Edition</span>
           <span className="text-zinc-400">
-            Enterprise Subscription &amp; Customer Billing Suite • Secure Billing Engine
+            Enterprise Subscription &amp; Customer Billing Suite • Modular Architecture
           </span>
         </div>
       </footer>
@@ -135,6 +136,14 @@ export const App: React.FC = () => {
             }
           />
 
+          <Route
+            path="/products"
+            element={
+              <ProtectedLayout>
+                <ProductsPage />
+              </ProtectedLayout>
+            }
+          />
           <Route
             path="/subscriptions"
             element={

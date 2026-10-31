@@ -310,7 +310,7 @@ export const QuotationDetailPage: React.FC = () => {
                     {formatINR(line.unitPrice)}
                   </td>
                   <td className="py-3.5 px-4 text-right font-mono text-emerald-600">
-                    {line.discount > 0 ? `-${formatINR(line.discount)}` : '—'}
+                    {(line.discount ?? 0) > 0 ? `-${formatINR(line.discount!)}` : '—'}
                   </td>
                   <td className="py-3.5 px-4 text-right text-zinc-500">
                     {line.taxRate}%
@@ -330,23 +330,23 @@ export const QuotationDetailPage: React.FC = () => {
                   {formatINR(quotation.subtotal)}
                 </td>
               </tr>
-              {quotation.discountAmount > 0 && (
+              {(quotation.discountAmount ?? 0) > 0 && (
                 <tr>
                   <td colSpan={5} className="py-2 px-4 text-right text-emerald-600 uppercase text-[11px]">
                     Total Discounts:
                   </td>
                   <td className="py-2 px-4 text-right font-mono text-emerald-600">
-                    -{formatINR(quotation.discountAmount)}
+                    -{formatINR(quotation.discountAmount!)}
                   </td>
                 </tr>
               )}
-              {quotation.taxAmount > 0 && (
+              {(quotation.taxAmount ?? 0) > 0 && (
                 <tr>
                   <td colSpan={5} className="py-2 px-4 text-right text-zinc-500 uppercase text-[11px]">
                     Total Taxes:
                   </td>
                   <td className="py-2 px-4 text-right font-mono">
-                    +{formatINR(quotation.taxAmount)}
+                    +{formatINR(quotation.taxAmount!)}
                   </td>
                 </tr>
               )}
