@@ -10,6 +10,7 @@ import {
   ProductVariant,
   User,
 } from '../types';
+import { mockFallback } from './mockFallback';
 
 const API_BASE = '/api';
 
@@ -18,39 +19,78 @@ function getAuthHeader(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+/**
+ * Robust fetch wrapper that gracefully handles empty bodies, non-JSON responses,
+ * and seamlessly falls back to mock storage if the backend server is offline.
+ */
+async function safeRequest<T>(
+  endpoint: string,
+  options: RequestInit = {},
+  fallbackFn?: () => Promise<T>
+): Promise<T> {
   const headers = {
     'Content-Type': 'application/json',
     ...getAuthHeader(),
     ...options.headers,
   };
 
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers,
+    });
 
-  const json = await response.json();
+    const text = await response.text();
+    let json: any = null;
 
-  if (!response.ok || json.success === false) {
-    throw new Error(json.error || json.message || 'Request failed');
+    if (text && text.trim()) {
+      try {
+        json = JSON.parse(text);
+      } catch {
+        json = null;
+      }
+    }
+
+    // If proxy failed (502 / 504 / 500 with no JSON) or connection was refused
+    if (!response.ok && (!json || response.status >= 502)) {
+      if (fallbackFn) {
+        console.warn(`[Brightloop API] Backend server at port 5000 is unreachable for ${endpoint}. Using client demo storage.`);
+        return await fallbackFn();
+      }
+      throw new Error(
+        json?.error ||
+          json?.message ||
+          `Backend server is unreachable on port 5000 (HTTP ${response.status}). Please start the backend with 'npm run dev:server'.`
+      );
+    }
+
+    if (!response.ok || (json && json.success === false)) {
+      throw new Error(json?.error || json?.message || `Request failed with status ${response.status}`);
+    }
+
+    return (json?.data !== undefined ? json.data : json) as T;
+  } catch (err: any) {
+    // If network error occurred (e.g. backend server is not running)
+    if (fallbackFn) {
+      console.warn(`[Brightloop API] Network fetch failed for ${endpoint}. Seamlessly falling back to client demo storage.`);
+      return await fallbackFn();
+    }
+    throw new Error(err.message || 'Network request failed. Please check your backend connection.');
   }
-
-  return json.data as T;
 }
 
-// Auth API Calls
+// Unified API Service
 export const api = {
   auth: {
     login: async (credentials: { email: string; password: string }) => {
-      const res = await fetch(`${API_BASE}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.error || 'Login failed');
-      return data.data as { user: User; token: string };
+      return safeRequest<{ user: User; token: string }>(
+        '/auth/login',
+        {
+          method: 'POST',
+          body: JSON.stringify(credentials),
+        },
+        () => mockFallback.login(credentials)
+      );
     },
 
     register: async (userData: {
@@ -59,29 +99,29 @@ export const api = {
       password: string;
       companyName?: string;
     }) => {
-      const res = await fetch(`${API_BASE}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.error || 'Registration failed');
-      return data.data as { user: User; token: string };
+      return safeRequest<{ user: User; token: string }>(
+        '/auth/register',
+        {
+          method: 'POST',
+          body: JSON.stringify(userData),
+        },
+        () => mockFallback.register(userData)
+      );
     },
 
     getMe: async (): Promise<User> => {
-      return request<User>('/auth/me');
+      return safeRequest<User>('/auth/me', {}, () => mockFallback.getMe());
     },
 
     forgotPassword: async (email: string): Promise<string> => {
-      const res = await fetch(`${API_BASE}/auth/forgot-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.error || 'Password reset failed');
-      return data.message || 'Reset link sent';
+      return safeRequest<string>(
+        '/auth/forgot-password',
+        {
+          method: 'POST',
+          body: JSON.stringify({ email }),
+        },
+        async () => `Password reset simulation: Instructions sent to ${email}`
+      );
     },
 
     addStaff: async (staffData: {
@@ -90,36 +130,77 @@ export const api = {
       password: string;
       companyName?: string;
     }): Promise<User> => {
-      return request<User>('/auth/add-staff', {
-        method: 'POST',
-        body: JSON.stringify(staffData),
-      });
+      return safeRequest<User>(
+        '/auth/add-staff',
+        {
+          method: 'POST',
+          body: JSON.stringify(staffData),
+        },
+        async () => {
+          const res = await mockFallback.register({ ...staffData, role: 'STAFF' });
+          return res.user;
+        }
+      );
     },
   },
 
   customer: {
     getDashboard: async (): Promise<CustomerDashboardSummary> => {
-      return request<CustomerDashboardSummary>('/customer/dashboard');
+      return safeRequest<CustomerDashboardSummary>(
+        '/customer/dashboard',
+        {},
+        () => mockFallback.getDashboard()
+      );
     },
 
     getSubscriptions: async (): Promise<CustomerSubscription[]> => {
-      return request<CustomerSubscription[]>('/customer/subscriptions');
+      return safeRequest<CustomerSubscription[]>(
+        '/customer/subscriptions',
+        {},
+        () => mockFallback.getSubscriptions()
+      );
     },
 
     getSubscriptionById: async (id: string): Promise<CustomerSubscription> => {
-      return request<CustomerSubscription>(`/customer/subscriptions/${id}`);
+      return safeRequest<CustomerSubscription>(
+        `/customer/subscriptions/${id}`,
+        {},
+        async () => {
+          const subs = await mockFallback.getSubscriptions();
+          const s = subs.find((x) => x.id === id);
+          if (!s) throw new Error('Subscription not found');
+          return s;
+        }
+      );
     },
 
     getInvoices: async (): Promise<CustomerInvoice[]> => {
-      return request<CustomerInvoice[]>('/customer/invoices');
+      return safeRequest<CustomerInvoice[]>(
+        '/customer/invoices',
+        {},
+        () => mockFallback.getInvoices()
+      );
     },
 
     getInvoiceById: async (id: string): Promise<CustomerInvoice> => {
-      return request<CustomerInvoice>(`/customer/invoices/${id}`);
+      return safeRequest<CustomerInvoice>(
+        `/customer/invoices/${id}`,
+        {},
+        async () => {
+          const invs = await mockFallback.getInvoices();
+          const i = invs.find((x) => x.id === id);
+          if (!i) throw new Error('Invoice not found');
+          return i;
+        }
+      );
     },
 
     getPayments: async (): Promise<CustomerPayment[]> => {
-      return request<CustomerPayment[]>('/customer/payments');
+      return safeRequest<CustomerPayment[]>(
+        '/customer/payments',
+        {},
+        () => mockFallback.getPayments()
+      );
     },
 
     payInvoice: async (data: {
@@ -127,24 +208,34 @@ export const api = {
       paymentMethod: string;
       note?: string;
     }): Promise<{ payment: CustomerPayment; invoice: CustomerInvoice }> => {
-      return request<{ payment: CustomerPayment; invoice: CustomerInvoice }>(
+      return safeRequest<{ payment: CustomerPayment; invoice: CustomerInvoice }>(
         '/customer/pay-invoice',
         {
           method: 'POST',
           body: JSON.stringify(data),
-        }
+        },
+        () => mockFallback.payInvoice(data)
       );
     },
 
     getProfile: async (): Promise<User> => {
-      return request<User>('/customer/profile');
+      return safeRequest<User>('/customer/profile', {}, () => mockFallback.getMe());
     },
 
     updateProfile: async (updates: Partial<User>): Promise<User> => {
-      return request<User>('/customer/profile', {
-        method: 'PUT',
-        body: JSON.stringify(updates),
-      });
+      return safeRequest<User>(
+        '/customer/profile',
+        {
+          method: 'PUT',
+          body: JSON.stringify(updates),
+        },
+        async () => {
+          const u = await mockFallback.getMe();
+          Object.assign(u, updates);
+          localStorage.setItem('brightloop_current_user', JSON.stringify(u));
+          return u;
+        }
+      );
     },
   },
 
@@ -155,36 +246,65 @@ export const api = {
       if (params?.type && params.type !== 'ALL') query.append('type', params.type);
       if (params?.activeOnly) query.append('activeOnly', 'true');
       const qs = query.toString();
-      return request<Product[]>(`/products${qs ? `?${qs}` : ''}`);
+      return safeRequest<Product[]>(
+        `/products${qs ? `?${qs}` : ''}`,
+        {},
+        () => mockFallback.getProducts(params)
+      );
     },
 
     getById: async (id: string): Promise<Product> => {
-      return request<Product>(`/products/${id}`);
+      return safeRequest<Product>(
+        `/products/${id}`,
+        {},
+        async () => {
+          const prods = await mockFallback.getProducts();
+          const p = prods.find((x) => x.id === id);
+          if (!p) throw new Error('Product not found');
+          return p;
+        }
+      );
     },
 
     create: async (data: Partial<Product>): Promise<Product> => {
-      return request<Product>('/products', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      return safeRequest<Product>(
+        '/products',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        () => mockFallback.createProduct(data)
+      );
     },
 
     update: async (id: string, data: Partial<Product>): Promise<Product> => {
-      return request<Product>(`/products/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      });
+      return safeRequest<Product>(
+        `/products/${id}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(data),
+        },
+        () => mockFallback.updateProduct(id, data)
+      );
     },
 
     delete: async (id: string): Promise<void> => {
-      return request<void>(`/products/${id}`, { method: 'DELETE' });
+      return safeRequest<void>(
+        `/products/${id}`,
+        { method: 'DELETE' },
+        () => mockFallback.deleteProduct(id)
+      );
     },
 
     addVariant: async (productId: string, data: { name: string; priceAdjustment: number }): Promise<ProductVariant> => {
-      return request<ProductVariant>(`/products/${productId}/variants`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      return safeRequest<ProductVariant>(
+        `/products/${productId}/variants`,
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        () => mockFallback.addVariant(productId, data)
+      );
     },
 
     updateVariant: async (
@@ -192,14 +312,31 @@ export const api = {
       variantId: string,
       data: { name?: string; priceAdjustment?: number }
     ): Promise<ProductVariant> => {
-      return request<ProductVariant>(`/products/${productId}/variants/${variantId}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      });
+      return safeRequest<ProductVariant>(
+        `/products/${productId}/variants/${variantId}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(data),
+        },
+        async () => {
+          const prods = await mockFallback.getProducts();
+          const p = prods.find((x) => x.id === productId);
+          if (!p) throw new Error('Product not found');
+          const v = p.variants.find((x) => x.id === variantId);
+          if (!v) throw new Error('Variant not found');
+          Object.assign(v, data);
+          localStorage.setItem('brightloop_local_products', JSON.stringify(prods));
+          return v;
+        }
+      );
     },
 
     deleteVariant: async (productId: string, variantId: string): Promise<void> => {
-      return request<void>(`/products/${productId}/variants/${variantId}`, { method: 'DELETE' });
+      return safeRequest<void>(
+        `/products/${productId}/variants/${variantId}`,
+        { method: 'DELETE' },
+        () => mockFallback.deleteVariant(productId, variantId)
+      );
     },
 
     // Plans
@@ -208,58 +345,108 @@ export const api = {
       if (params?.frequency && params.frequency !== 'ALL') query.append('frequency', params.frequency);
       if (params?.activeOnly) query.append('activeOnly', 'true');
       const qs = query.toString();
-      return request<Plan[]>(`/products/plans${qs ? `?${qs}` : ''}`);
+      return safeRequest<Plan[]>(
+        `/products/plans${qs ? `?${qs}` : ''}`,
+        {},
+        () => mockFallback.getPlans(params)
+      );
     },
 
     getPlanById: async (id: string): Promise<Plan> => {
-      return request<Plan>(`/products/plans/${id}`);
+      return safeRequest<Plan>(
+        `/products/plans/${id}`,
+        {},
+        async () => {
+          const plans = await mockFallback.getPlans();
+          const pl = plans.find((x) => x.id === id);
+          if (!pl) throw new Error('Plan not found');
+          return pl;
+        }
+      );
     },
 
     createPlan: async (data: Partial<Plan>): Promise<Plan> => {
-      return request<Plan>('/products/plans', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      return safeRequest<Plan>(
+        '/products/plans',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        () => mockFallback.createPlan(data)
+      );
     },
 
     updatePlan: async (id: string, data: Partial<Plan>): Promise<Plan> => {
-      return request<Plan>(`/products/plans/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      });
+      return safeRequest<Plan>(
+        `/products/plans/${id}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(data),
+        },
+        () => mockFallback.updatePlan(id, data)
+      );
     },
 
     deletePlan: async (id: string): Promise<void> => {
-      return request<void>(`/products/plans/${id}`, { method: 'DELETE' });
+      return safeRequest<void>(
+        `/products/plans/${id}`,
+        { method: 'DELETE' },
+        () => mockFallback.deletePlan(id)
+      );
     },
 
     // Discounts
     getDiscounts: async (activeOnly?: boolean): Promise<DiscountRule[]> => {
-      return request<DiscountRule[]>(`/products/discounts${activeOnly ? '?activeOnly=true' : ''}`);
+      return safeRequest<DiscountRule[]>(
+        `/products/discounts${activeOnly ? '?activeOnly=true' : ''}`,
+        {},
+        () => mockFallback.getDiscounts()
+      );
     },
 
     validateDiscount: async (code: string, amount: number): Promise<DiscountValidationResult> => {
-      return request<DiscountValidationResult>(
-        `/products/discounts/validate/${encodeURIComponent(code)}?amount=${amount}`
+      return safeRequest<DiscountValidationResult>(
+        `/products/discounts/validate/${encodeURIComponent(code)}?amount=${amount}`,
+        {},
+        () => mockFallback.validateDiscount(code, amount)
       );
     },
 
     createDiscount: async (data: Partial<DiscountRule>): Promise<DiscountRule> => {
-      return request<DiscountRule>('/products/discounts', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      return safeRequest<DiscountRule>(
+        '/products/discounts',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        () => mockFallback.createDiscount(data)
+      );
     },
 
     updateDiscount: async (id: string, data: Partial<DiscountRule>): Promise<DiscountRule> => {
-      return request<DiscountRule>(`/products/discounts/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      });
+      return safeRequest<DiscountRule>(
+        `/products/discounts/${id}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(data),
+        },
+        async () => {
+          const discounts = await mockFallback.getDiscounts();
+          const d = discounts.find((x) => x.id === id);
+          if (!d) throw new Error('Discount not found');
+          Object.assign(d, data);
+          localStorage.setItem('brightloop_local_discounts', JSON.stringify(discounts));
+          return d;
+        }
+      );
     },
 
     deleteDiscount: async (id: string): Promise<void> => {
-      return request<void>(`/products/discounts/${id}`, { method: 'DELETE' });
+      return safeRequest<void>(
+        `/products/discounts/${id}`,
+        { method: 'DELETE' },
+        () => mockFallback.deleteDiscount(id)
+      );
     },
   },
 };
