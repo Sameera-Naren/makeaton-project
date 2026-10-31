@@ -1,7 +1,6 @@
-# Brightloop Software – Subscription Management System
-**Make-A-Ton Virtual Round Hackathon Project**
+# Brightloop Subscription Management System
 
-A centralized subscription management platform for Brightloop Software, built by a team of four during Make-A-Ton hackathon.
+> Built for the Make-A-Ton Hackathon. A high-performance monorepo subscription billing and management platform with customer, quotation, billing, and revenue workflows.
 
 ---
 
@@ -9,53 +8,19 @@ A centralized subscription management platform for Brightloop Software, built by
 
 | Member | Module | Status |
 |--------|--------|--------|
-| **Member 1** | Authentication & Customer Portal | Implemented (`client/`, `server/`) |
-| **Member 2** | Products, Plans & Discounts | Planned / In Progress |
-| **Member 3** | **Quotations & Subscription Management** | **Integrated & Active** (`feature/quotations-subscriptions`) |
-| **Member 4** | Billing, Payments & Analytics | Planned / In Progress |
+| **Member 1** | Authentication & Customer Portal | ✅ Implemented |
+| **Member 2** | Products, Plans & Discounts | In progress |
+| **Member 3** | **Quotations & Subscription Lifecycle** | ✅ Integrated |
+| **Member 4** | **Billing, Payments & Analytics** | ✅ Implemented |
 
 ---
 
 ## 🏗️ Architecture & Technology Stack
 
-- **Monorepo Structure**:
-  - `client/` — React + TypeScript + Vite + Tailwind CSS
-  - `server/` — Node.js + Express + TypeScript + Prisma
-- **Database**: PostgreSQL with Prisma ORM (plus fallback store for demo)
-- **UI Design System**: Tailwind CSS, Lucide Icons, Pastel Accent Visuals
-
----
-
-## 🚀 Quick Start
-
-### 1. Prerequisites
-- Node.js 18+
-- npm or pnpm
-- PostgreSQL (optional for local DB; in-memory store available for rapid demo)
-
-### 2. Setup & Installation
-
-```bash
-# Install root dependencies
-npm install
-
-# Start both backend and frontend concurrently
-npm run dev
-```
-
-Or run individually:
-
-```bash
-# Server (Backend on port 5000)
-cd server
-npm install
-npm run dev
-
-# Client (Frontend on port 5173)
-cd client
-npm install
-npm run dev
-```
+- **Frontend:** React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons
+- **Backend:** Node.js, Express, TypeScript, REST API
+- **Database & ORM:** PostgreSQL, Prisma ORM (with in-memory fallback store for rapid judging & demo mode)
+- **Architecture:** Modular monolith with clean domain separation for auth, customer, quotations, subscriptions, and billing
 
 ---
 
@@ -82,7 +47,71 @@ npm run dev
 
 ---
 
+## 💳 Member 4: Billing, Payments & Analytics
+
+### Backend REST Endpoints (`/api/billing`)
+
+All endpoints are protected and accessible to `STAFF` and `ADMIN` roles:
+
+- `POST /api/billing/invoices/generate` — generates an invoice from an active subscription
+- `GET /api/billing/invoices` — retrieves invoice list with status filters and search
+- `GET /api/billing/invoices/:id` — fetches full invoice details and payment audit trail
+- `POST /api/billing/invoices` — creates a manual invoice
+- `PUT /api/billing/invoices/:id/status` — updates invoice status lifecycle
+- `POST /api/billing/payments` — records invoice payment remittance
+- `GET /api/billing/payments` — complete payment ledger
+- `GET /api/billing/analytics` and `/overview` — executive revenue metrics including MRR, ARR, receivables, and payment mix
+
+### Frontend Views
+
+- Executive billing dashboard under `/billing/analytics`
+- Invoices console under `/billing/invoices`
+- Payments ledger under `/billing/payments`
+
+---
+
+## 🚀 Quick Start Guide
+
+### 1. Prerequisites
+- Node.js (v18+)
+- npm
+
+### 2. Installation
+```bash
+cd server && npm install
+cd ../client && npm install
+```
+
+### 3. Run Development Servers
+```bash
+cd server
+npm run dev
+```
+
+```bash
+cd client
+npm run dev
+```
+
+### 4. Run Verification Tests
+```bash
+cd server
+npm run test
+npm run test:billing
+```
+
+---
+
+## 🔐 Demo Credentials
+
+- **Customer:** `customer@brightloop.com` / `Password@123`
+- **Staff:** `staff@brightloop.com` / `Staff@12345`
+- **Admin:** `admin@brightloop.com` / `Admin@12345`
+
+---
+
 ## 🌿 Branch Strategy
 
-- `main` — production / consolidated team branch
-- `feature/quotations-subscriptions` — Member 3 feature branch
+- `main` — consolidated production branch
+- `billing` — billing and revenue implementation branch
+- `feature/quotations-subscriptions` — quotations and subscription lifecycle branch
