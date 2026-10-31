@@ -239,6 +239,44 @@ async function runProductsTests() {
   validateDiscountCode(mockReq({ params: { code: 'NONEXISTENT999' }, query: { amount: 500.0 } }), invalidCodeRes);
   assert('Reject invalid/non-existent promo code', invalidCodeRes.jsonData?.data?.valid === false);
 
+  // ----------------------------------------------------
+  // SECTION 5: ROLE-BASED ACCESS CONTROL & QUOTATIONS
+  // ----------------------------------------------------
+  console.log('\n[Section 5] Role-Based Access Control & Quotation Workflows:');
+
+  // Customer asks for a custom quotation
+  const customerQuote = dbStore.createQuotationRequest({
+    customerId: 'cust-uuid-001',
+    customerName: 'Alex Rivera',
+    customerEmail: 'customer@brightloop.com',
+    planName: 'Enterprise Custom Tier',
+    notes: 'Require 25 staff seats and dedicated cloud backup',
+    estimatedAmount: 950.0,
+    items: [{ productName: 'Enterprise Custom Tier', quantity: 1, unitPrice: 950.0, amount: 950.0 }],
+  });
+  assert('Customer creates custom quotation request (status SENT)', customerQuote.status === 'SENT' && customerQuote.totalAmount === 950.0);
+
+  // Staff prepares a quotation for a customer
+  const staffQuote = dbStore.prepareStaffQuotation({
+    customerId: 'cust-uuid-001',
+    customerName: 'Alex Rivera',
+    customerEmail: 'customer@brightloop.com',
+    planName: 'Commercial Multi-Tier Package',
+    totalAmount: 1450.0,
+    validDays: 45,
+    notes: 'Staff negotiated 15% discount for annual billing',
+    items: [{ productName: 'Commercial Multi-Tier Package', quantity: 1, unitPrice: 1450.0, amount: 1450.0 }],
+  });
+  assert('Staff prepares new quotation for customer (status DRAFT)', staffQuote.status === 'DRAFT' && staffQuote.totalAmount === 1450.0);
+
+  // Staff updates quotation status
+  const updatedQuote = dbStore.updateQuotationStatus(staffQuote.id, 'ACCEPTED');
+  assert('Staff/Admin updates quotation status to ACCEPTED', updatedQuote?.status === 'ACCEPTED');
+
+  // Staff and Admin can view all customer subscriptions
+  const allSubs = dbStore.getAllSubscriptions();
+  assert('Staff/Admin retrieves all customer subscriptions across platform', allSubs.length > 0 && allSubs[0].subscriptionNumber !== undefined);
+
   // Clean up created entities
   deletePlan(mockReq({ params: { id: createdPlan.id } }), mockRes());
   deleteProduct(mockReq({ params: { id: createdProd.id } }), mockRes());

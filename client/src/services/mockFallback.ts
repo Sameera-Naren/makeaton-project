@@ -8,6 +8,8 @@ import {
   Plan,
   Product,
   ProductVariant,
+  Quotation,
+  QuotationStatus,
   Role,
   User,
 } from '../types';
@@ -835,6 +837,134 @@ class MockFallbackService {
     let discounts = await this.getDiscounts();
     discounts = discounts.filter((d) => d.id !== id);
     localStorage.setItem('brightloop_local_discounts', JSON.stringify(discounts));
+  }
+
+  // Subscriptions & Quotations (RBAC: Customer Request, Staff Prepare)
+  async getAllSubscriptions(): Promise<CustomerSubscription[]> {
+    return this.getSubscriptions();
+  }
+
+  async getQuotations(customerId?: string): Promise<Quotation[]> {
+    const raw = localStorage.getItem('brightloop_local_quotations');
+    let list: Quotation[] = raw
+      ? JSON.parse(raw)
+      : [
+          {
+            id: 'quo-001',
+            quotationNumber: 'QUO-2026-0041',
+            customerId: 'cust-uuid-001',
+            customerName: 'Alex Rivera',
+            customerEmail: 'customer@brightloop.com',
+            planName: 'Brightloop Enterprise Cloud Suite',
+            totalAmount: 1420.0,
+            status: 'SENT',
+            notes: 'Enterprise bundle request with Odoo Brand Edition.',
+            validUntil: '2026-11-30T00:00:00.000Z',
+            createdAt: '2026-10-15T00:00:00.000Z',
+            items: [
+              { productName: 'Core ERP Software Base', variantName: 'Odoo Brand Edition (+560)', quantity: 1, unitPrice: 860, amount: 860 },
+              { productName: 'Staff User Seats', variantName: 'Standard User Seat', quantity: 10, unitPrice: 35, amount: 350 },
+            ],
+          },
+          {
+            id: 'quo-002',
+            quotationNumber: 'QUO-2026-0089',
+            customerId: 'cust-uuid-001',
+            customerName: 'Alex Rivera',
+            customerEmail: 'customer@brightloop.com',
+            planName: 'Secure Cloud Automated Backup & DR',
+            totalAmount: 850.0,
+            status: 'DRAFT',
+            notes: 'Draft quotation prepared by staff specialist Sarah Chen.',
+            validUntil: '2026-12-15T00:00:00.000Z',
+            createdAt: '2026-10-20T00:00:00.000Z',
+            items: [
+              { productName: 'Cloud Vault 2TB Tier', variantName: 'Encrypted Hot Storage', quantity: 1, unitPrice: 850, amount: 850 },
+            ],
+          },
+        ];
+
+    if (customerId) {
+      list = list.filter((q) => q.customerId === customerId);
+    }
+    return list;
+  }
+
+  async createQuotationRequest(data: {
+    planName?: string;
+    notes: string;
+    estimatedAmount?: number;
+    items?: any[];
+  }): Promise<Quotation> {
+    const user = await this.getMe();
+    const quotations = await this.getQuotations();
+    const quotationNumber = `QUO-${Date.now().toString().slice(-6)}`;
+    const now = new Date();
+    const validUntil = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    const quote: Quotation = {
+      id: `quo-${Date.now().toString().slice(-6)}`,
+      quotationNumber,
+      customerId: user.id,
+      customerName: user.name,
+      customerEmail: user.email,
+      planName: data.planName || 'Custom Requested Plan',
+      totalAmount: data.estimatedAmount || 0,
+      status: 'SENT',
+      notes: data.notes,
+      items: data.items || [],
+      validUntil,
+      createdAt: now.toISOString(),
+    };
+
+    quotations.unshift(quote);
+    localStorage.setItem('brightloop_local_quotations', JSON.stringify(quotations));
+    return quote;
+  }
+
+  async prepareStaffQuotation(data: {
+    customerId: string;
+    planName: string;
+    totalAmount: number;
+    notes?: string;
+    validDays?: number;
+    items?: any[];
+  }): Promise<Quotation> {
+    const users = this.getStoredUsers();
+    const targetCustomer = users.find((u) => u.id === data.customerId);
+    const quotations = await this.getQuotations();
+    const quotationNumber = `QUO-${Date.now().toString().slice(-6)}`;
+    const now = new Date();
+    const days = data.validDays || 30;
+    const validUntil = new Date(now.getTime() + days * 24 * 60 * 60 * 1000).toISOString();
+
+    const quote: Quotation = {
+      id: `quo-${Date.now().toString().slice(-6)}`,
+      quotationNumber,
+      customerId: data.customerId,
+      customerName: targetCustomer ? targetCustomer.name : 'Valued Customer',
+      customerEmail: targetCustomer ? targetCustomer.email : '',
+      planName: data.planName,
+      totalAmount: Number(data.totalAmount) || 0,
+      status: 'DRAFT',
+      notes: data.notes || '',
+      items: data.items || [],
+      validUntil,
+      createdAt: now.toISOString(),
+    };
+
+    quotations.unshift(quote);
+    localStorage.setItem('brightloop_local_quotations', JSON.stringify(quotations));
+    return quote;
+  }
+
+  async updateQuotationStatus(id: string, status: QuotationStatus): Promise<Quotation> {
+    const quotations = await this.getQuotations();
+    const q = quotations.find((x) => x.id === id);
+    if (!q) throw new Error('Quotation not found');
+    q.status = status;
+    localStorage.setItem('brightloop_local_quotations', JSON.stringify(quotations));
+    return q;
   }
 }
 

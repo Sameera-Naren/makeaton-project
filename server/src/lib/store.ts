@@ -11,6 +11,8 @@ import {
   Plan,
   Product,
   ProductVariant,
+  Quotation,
+  QuotationStatus,
   Role,
   UserPayload,
 } from '../types/index.js';
@@ -28,6 +30,7 @@ class Store {
   products: Product[] = [];
   plans: Plan[] = [];
   discountRules: DiscountRule[] = [];
+  quotations: Quotation[] = [];
 
   constructor() {
     this.seed();
@@ -547,6 +550,70 @@ class Store {
         createdAt: '2026-02-01T00:00:00.000Z',
       },
     ];
+
+    // Seed Initial Quotations
+    this.quotations = [
+      {
+        id: 'quo-001',
+        quotationNumber: 'QUO-2026-0041',
+        customerId: customerUser.id,
+        customerName: customerUser.name,
+        customerEmail: customerUser.email,
+        planId: 'plan-002',
+        planName: 'Brightloop Enterprise Cloud Suite',
+        totalAmount: 1420.0,
+        status: 'SENT',
+        notes: 'Custom enterprise quotation requested with Odoo Brand Edition.',
+        validUntil: '2026-11-30T00:00:00.000Z',
+        createdAt: '2026-10-15T00:00:00.000Z',
+        items: [
+          {
+            productName: 'Core ERP Software Base',
+            variantName: 'Odoo Brand Edition (+560)',
+            quantity: 1,
+            unitPrice: 860.0,
+            amount: 860.0,
+          },
+          {
+            productName: 'Staff User Seats (Concurrent)',
+            variantName: 'Standard User Seat',
+            quantity: 10,
+            unitPrice: 35.0,
+            amount: 350.0,
+          },
+          {
+            productName: 'Advanced Financial Analytics Module',
+            variantName: 'Full Reporting Pack',
+            quantity: 1,
+            unitPrice: 210.0,
+            amount: 210.0,
+          },
+        ],
+      },
+      {
+        id: 'quo-002',
+        quotationNumber: 'QUO-2026-0089',
+        customerId: customerUser.id,
+        customerName: customerUser.name,
+        customerEmail: customerUser.email,
+        planId: 'plan-003',
+        planName: 'Secure Cloud Automated Backup & DR',
+        totalAmount: 850.0,
+        status: 'DRAFT',
+        notes: 'Draft quotation prepared by staff member Sarah Chen for 2TB vault tier.',
+        validUntil: '2026-12-15T00:00:00.000Z',
+        createdAt: '2026-10-20T00:00:00.000Z',
+        items: [
+          {
+            productName: 'Cloud Vault 2TB Tier',
+            variantName: 'Encrypted Hot Storage',
+            quantity: 1,
+            unitPrice: 850.0,
+            amount: 850.0,
+          },
+        ],
+      },
+    ];
   }
 
   // User methods
@@ -1060,6 +1127,100 @@ class Store {
       finalAmount,
       rule,
     };
+  }
+
+  // -------------------------------------------------------------
+  // ALL SUBSCRIPTIONS & QUOTATIONS (STAFF & CUSTOMER RBAC)
+  // -------------------------------------------------------------
+
+  getAllSubscriptions(): CustomerSubscription[] {
+    return this.subscriptions;
+  }
+
+  getQuotations(customerId?: string): Quotation[] {
+    if (customerId) {
+      return this.quotations.filter((q) => q.customerId === customerId);
+    }
+    return this.quotations;
+  }
+
+  getQuotationById(id: string): Quotation | null {
+    return this.quotations.find((q) => q.id === id) || null;
+  }
+
+  createQuotationRequest(data: {
+    customerId: string;
+    customerName: string;
+    customerEmail: string;
+    planName?: string;
+    notes: string;
+    estimatedAmount?: number;
+    items?: Array<{ productName: string; variantName?: string; quantity: number; unitPrice: number; amount: number }>;
+  }): Quotation {
+    const quotationNumber = `QUO-${Date.now().toString().slice(-6)}`;
+    const now = new Date();
+    const validUntil = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    const quote: Quotation = {
+      id: `quo-${Date.now().toString().slice(-6)}`,
+      quotationNumber,
+      customerId: data.customerId,
+      customerName: data.customerName,
+      customerEmail: data.customerEmail,
+      planName: data.planName || 'Custom Enterprise Configuration',
+      totalAmount: data.estimatedAmount || 0,
+      status: 'SENT',
+      notes: data.notes,
+      items: data.items || [],
+      validUntil,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+    };
+
+    this.quotations.unshift(quote);
+    return quote;
+  }
+
+  prepareStaffQuotation(data: {
+    customerId: string;
+    planName: string;
+    totalAmount: number;
+    notes?: string;
+    validDays?: number;
+    items?: Array<{ productName: string; variantName?: string; quantity: number; unitPrice: number; amount: number }>;
+  }): Quotation {
+    const customer = this.findUserById(data.customerId);
+    const quotationNumber = `QUO-${Date.now().toString().slice(-6)}`;
+    const now = new Date();
+    const days = data.validDays || 30;
+    const validUntil = new Date(now.getTime() + days * 24 * 60 * 60 * 1000).toISOString();
+
+    const quote: Quotation = {
+      id: `quo-${Date.now().toString().slice(-6)}`,
+      quotationNumber,
+      customerId: data.customerId,
+      customerName: customer ? customer.name : 'Valued Customer',
+      customerEmail: customer ? customer.email : '',
+      planName: data.planName,
+      totalAmount: Number(data.totalAmount) || 0,
+      status: 'DRAFT',
+      notes: data.notes || '',
+      items: data.items || [],
+      validUntil,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+    };
+
+    this.quotations.unshift(quote);
+    return quote;
+  }
+
+  updateQuotationStatus(id: string, status: QuotationStatus): Quotation | null {
+    const quote = this.getQuotationById(id);
+    if (!quote) return null;
+    quote.status = status;
+    quote.updatedAt = new Date().toISOString();
+    return quote;
   }
 }
 

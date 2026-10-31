@@ -17,24 +17,30 @@ import {
   Tag,
   Calendar,
   Percent,
-  DollarSign,
   CheckCircle2,
   AlertCircle,
   Trash2,
   Edit3,
-  Layers,
   Sparkles,
   Clock,
-  ArrowRight,
-  ShieldCheck,
   Zap,
   Sliders,
   Check,
+  FileText,
+  Send,
+  UserCheck,
+  ShieldCheck,
+  User,
 } from 'lucide-react';
 
 export const ProductsPage: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'products' | 'plans' | 'discounts'>('products');
+
+  // RBAC Helpers
+  const isCustomer = user?.role === 'CUSTOMER';
+  const isStaff = user?.role === 'STAFF';
+  const isAdmin = user?.role === 'ADMIN';
 
   // Products state
   const [products, setProducts] = useState<Product[]>([]);
@@ -56,7 +62,7 @@ export const ProductsPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Modals state
+  // Admin Product Modal state
   const [showProductModal, setShowProductModal] = useState<boolean>(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [productForm, setProductForm] = useState<{
@@ -75,7 +81,7 @@ export const ProductsPage: React.FC = () => {
     isActive: true,
   });
 
-  // Variant Modal state
+  // Admin Variant Modal state
   const [showVariantModal, setShowVariantModal] = useState<boolean>(false);
   const [targetProductForVariant, setTargetProductForVariant] = useState<Product | null>(null);
   const [variantForm, setVariantForm] = useState<{ name: string; priceAdjustment: number }>({
@@ -83,7 +89,7 @@ export const ProductsPage: React.FC = () => {
     priceAdjustment: 0,
   });
 
-  // Plan Modal state
+  // Admin Plan Modal state
   const [showPlanModal, setShowPlanModal] = useState<boolean>(false);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
   const [planForm, setPlanForm] = useState<{
@@ -108,7 +114,7 @@ export const ProductsPage: React.FC = () => {
     isActive: true,
   });
 
-  // Discount Modal state
+  // Admin Discount Modal state
   const [showDiscountModal, setShowDiscountModal] = useState<boolean>(false);
   const [discountForm, setDiscountForm] = useState<{
     code: string;
@@ -126,6 +132,42 @@ export const ProductsPage: React.FC = () => {
     minPurchase: 200,
     maxUsage: 100,
     isActive: true,
+  });
+
+  // Customer Quotation Request Modal state
+  const [showQuoteRequestModal, setShowQuoteRequestModal] = useState<boolean>(false);
+  const [quoteRequestForm, setQuoteRequestForm] = useState<{
+    planName: string;
+    variantName: string;
+    quantity: number;
+    unitPrice: number;
+    notes: string;
+    availableVariants: ProductVariant[];
+  }>({
+    planName: '',
+    variantName: '',
+    quantity: 1,
+    unitPrice: 0,
+    notes: '',
+    availableVariants: [],
+  });
+
+  // Staff Quotation Preparation Modal state
+  const [showStaffQuoteModal, setShowStaffQuoteModal] = useState<boolean>(false);
+  const [staffQuoteForm, setStaffQuoteForm] = useState<{
+    customerId: string;
+    customerEmail: string;
+    planName: string;
+    totalAmount: number;
+    validDays: number;
+    notes: string;
+  }>({
+    customerId: 'cust-uuid-001',
+    customerEmail: 'customer@brightloop.com',
+    planName: '',
+    totalAmount: 1200,
+    validDays: 30,
+    notes: '',
   });
 
   const showToast = (msg: string) => {
@@ -173,9 +215,13 @@ export const ProductsPage: React.FC = () => {
     return selectedFrequency === 'ALL' || pl.billingFrequency === selectedFrequency;
   });
 
-  // Handlers for Products
+  // Handlers for Products (ADMIN ONLY)
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) {
+      alert('Only administrators can create or edit products.');
+      return;
+    }
     try {
       if (editingProduct) {
         const updated = await api.products.update(editingProduct.id, productForm);
@@ -194,6 +240,10 @@ export const ProductsPage: React.FC = () => {
   };
 
   const handleDeleteProduct = async (id: string, name: string) => {
+    if (!isAdmin) {
+      alert('Only administrators can remove products.');
+      return;
+    }
     if (!confirm(`Are you sure you want to remove product '${name}'?`)) return;
     try {
       await api.products.delete(id);
@@ -204,9 +254,13 @@ export const ProductsPage: React.FC = () => {
     }
   };
 
-  // Handlers for Variants
+  // Handlers for Variants (ADMIN ONLY)
   const handleAddVariant = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) {
+      alert('Only administrators can configure product variants.');
+      return;
+    }
     if (!targetProductForVariant) return;
     try {
       const newVar = await api.products.addVariant(targetProductForVariant.id, variantForm);
@@ -225,6 +279,10 @@ export const ProductsPage: React.FC = () => {
   };
 
   const handleDeleteVariant = async (productId: string, variantId: string, varName: string) => {
+    if (!isAdmin) {
+      alert('Only administrators can remove variants.');
+      return;
+    }
     if (!confirm(`Delete variant '${varName}'?`)) return;
     try {
       await api.products.deleteVariant(productId, variantId);
@@ -239,9 +297,13 @@ export const ProductsPage: React.FC = () => {
     }
   };
 
-  // Handlers for Plans
+  // Handlers for Plans (ADMIN ONLY)
   const handleSavePlan = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) {
+      alert('Only administrators can configure subscription plans.');
+      return;
+    }
     try {
       if (editingPlan) {
         const updated = await api.products.updatePlan(editingPlan.id, planForm);
@@ -260,6 +322,10 @@ export const ProductsPage: React.FC = () => {
   };
 
   const handleDeletePlan = async (id: string, name: string) => {
+    if (!isAdmin) {
+      alert('Only administrators can delete subscription plans.');
+      return;
+    }
     if (!confirm(`Are you sure you want to delete plan '${name}'?`)) return;
     try {
       await api.products.deletePlan(id);
@@ -270,9 +336,13 @@ export const ProductsPage: React.FC = () => {
     }
   };
 
-  // Handlers for Discounts
+  // Handlers for Discounts (ADMIN ONLY)
   const handleSaveDiscount = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) {
+      alert('Only administrators can create discount codes.');
+      return;
+    }
     try {
       const created = await api.products.createDiscount(discountForm);
       setDiscounts((prev) => [created, ...prev]);
@@ -293,6 +363,10 @@ export const ProductsPage: React.FC = () => {
   };
 
   const handleDeleteDiscount = async (id: string, code: string) => {
+    if (!isAdmin) {
+      alert('Only administrators can remove promo codes.');
+      return;
+    }
     if (!confirm(`Delete promo code '${code}'?`)) return;
     try {
       await api.products.deleteDiscount(id);
@@ -316,35 +390,168 @@ export const ProductsPage: React.FC = () => {
     }
   };
 
+  // Handlers for Quotation Request (CUSTOMER & ALL ROLES)
+  const handleOpenQuoteRequest = (title: string, basePrice: number, variants: ProductVariant[] = []) => {
+    setQuoteRequestForm({
+      planName: title,
+      variantName: variants.length > 0 ? variants[0].name : '',
+      quantity: 1,
+      unitPrice: basePrice,
+      notes: '',
+      availableVariants: variants,
+    });
+    setShowQuoteRequestModal(true);
+  };
+
+  const handleSubmitQuoteRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const selectedVar = quoteRequestForm.availableVariants.find(
+        (v) => v.name === quoteRequestForm.variantName
+      );
+      const unitPrice =
+        quoteRequestForm.unitPrice + (selectedVar ? selectedVar.priceAdjustment : 0);
+      const total = unitPrice * quoteRequestForm.quantity;
+
+      const res = await api.subscriptions.requestQuotation({
+        planName: quoteRequestForm.planName,
+        notes: quoteRequestForm.notes,
+        estimatedAmount: total,
+        items: [
+          {
+            productName: quoteRequestForm.planName,
+            variantName: quoteRequestForm.variantName || undefined,
+            quantity: quoteRequestForm.quantity,
+            unitPrice,
+            amount: total,
+          },
+        ],
+      });
+
+      setShowQuoteRequestModal(false);
+      showToast(
+        `Quotation request ${res.quotationNumber} submitted! Our staff will prepare a customized quotation for you.`
+      );
+    } catch (err: any) {
+      alert(err.message || 'Error submitting quotation request');
+    }
+  };
+
+  // Handlers for Staff Quotation Preparation (STAFF & ADMIN)
+  const handleOpenStaffQuote = (prefillTitle?: string, prefillAmount?: number) => {
+    setStaffQuoteForm({
+      customerId: 'cust-uuid-001',
+      customerEmail: 'customer@brightloop.com',
+      planName: prefillTitle || 'Custom Enterprise Suite',
+      totalAmount: prefillAmount || 1200,
+      validDays: 30,
+      notes: 'Custom negotiated enterprise quotation prepared by Brightloop staff.',
+    });
+    setShowStaffQuoteModal(true);
+  };
+
+  const handleSubmitStaffQuote = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await api.subscriptions.prepareQuotation({
+        customerId: staffQuoteForm.customerId,
+        planName: staffQuoteForm.planName,
+        totalAmount: Number(staffQuoteForm.totalAmount),
+        validDays: Number(staffQuoteForm.validDays) || 30,
+        notes: staffQuoteForm.notes,
+        items: [
+          {
+            productName: staffQuoteForm.planName,
+            quantity: 1,
+            unitPrice: Number(staffQuoteForm.totalAmount),
+            amount: Number(staffQuoteForm.totalAmount),
+          },
+        ],
+      });
+
+      setShowStaffQuoteModal(false);
+      showToast(
+        `Quotation ${res.quotationNumber} prepared successfully for customer ${res.customerName}.`
+      );
+    } catch (err: any) {
+      alert(err.message || 'Error preparing quotation');
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-zinc-900 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 border border-zinc-700 animate-bounce">
-          <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+          <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
           <span className="text-sm font-medium">{toastMessage}</span>
         </div>
       )}
 
-      {/* Hero Header matching Brightloop design */}
+      {/* Hero Header matching Brightloop design with RBAC contextual info */}
       <div className="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 text-zinc-800 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-              <span>Catalog & Revenue Architecture</span>
+            <div className="flex items-center gap-2">
+              {isCustomer && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
+                  <User className="w-3.5 h-3.5" /> Customer Access: Search, Review & Request Quotations
+                </span>
+              )}
+              {isStaff && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold">
+                  <UserCheck className="w-3.5 h-3.5" /> Staff Access: Quotation Preparation Desk
+                </span>
+              )}
+              {isAdmin && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-xs font-semibold">
+                  <ShieldCheck className="w-3.5 h-3.5" /> Admin Control: Full Product & Plan Management
+                </span>
+              )}
             </div>
+
             <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-950 tracking-tight">
-              Products, Plans & Discounts
+              {isCustomer
+                ? 'Product Catalog & Subscription Plans'
+                : isStaff
+                ? 'Products, Plans & Quotation Desk'
+                : 'Products, Plans & Discounts'}
             </h1>
             <p className="text-zinc-600 text-sm sm:text-base max-w-2xl leading-relaxed">
-              Configure product variants, multi-frequency subscription billing models (Daily, Weekly, Monthly,
-              Yearly), and targeted promotion discount engines.
+              {isCustomer
+                ? 'Explore enterprise software solutions, review subscription tiers, and request tailored custom quotations.'
+                : isStaff
+                ? 'Browse offerings, prepare custom quotations with negotiated pricing, and review customer subscription tiers.'
+                : 'Add and remove products, configure product variants, multi-frequency subscription billing models, and manage discount promo codes.'}
             </p>
           </div>
 
+          {/* Action Buttons based on RBAC */}
           <div className="flex flex-wrap items-center gap-3">
-            {activeTab === 'products' && (
+            {/* Customer Quotation Request Button */}
+            {isCustomer && (
+              <button
+                onClick={() => handleOpenQuoteRequest('Custom Enterprise Package', 600)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-950 text-white text-xs font-semibold shadow hover:bg-zinc-800 transition"
+              >
+                <FileText className="w-4 h-4 text-indigo-400" />
+                <span>Ask for Custom Quotation</span>
+              </button>
+            )}
+
+            {/* Staff Quotation Preparation Button */}
+            {(isStaff || isAdmin) && (
+              <button
+                onClick={() => handleOpenStaffQuote()}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 text-white text-xs font-semibold shadow hover:bg-amber-700 transition"
+              >
+                <FileText className="w-4 h-4" />
+                <span>Prepare Customer Quotation</span>
+              </button>
+            )}
+
+            {/* Admin Management Buttons */}
+            {isAdmin && activeTab === 'products' && (
               <button
                 onClick={() => {
                   setEditingProduct(null);
@@ -361,11 +568,11 @@ export const ProductsPage: React.FC = () => {
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-950 text-white text-xs font-semibold shadow hover:bg-zinc-800 transition"
               >
                 <Plus className="w-4 h-4" />
-                <span>Create Product</span>
+                <span>Add New Product</span>
               </button>
             )}
 
-            {activeTab === 'plans' && (
+            {isAdmin && activeTab === 'plans' && (
               <button
                 onClick={() => {
                   setEditingPlan(null);
@@ -389,7 +596,7 @@ export const ProductsPage: React.FC = () => {
               </button>
             )}
 
-            {activeTab === 'discounts' && (
+            {isAdmin && activeTab === 'discounts' && (
               <button
                 onClick={() => setShowDiscountModal(true)}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 text-white text-xs font-semibold shadow hover:bg-purple-700 transition"
@@ -498,7 +705,7 @@ export const ProductsPage: React.FC = () => {
                       className="bg-white rounded-3xl p-6 border border-zinc-200 shadow-sm hover:shadow-md transition flex flex-col justify-between"
                     >
                       <div>
-                        {/* Header: Type Pill & Actions */}
+                        {/* Header: Type Pill & Admin Controls */}
                         <div className="flex items-center justify-between mb-4">
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -514,33 +721,36 @@ export const ProductsPage: React.FC = () => {
                             {prod.type}
                           </span>
 
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              onClick={() => {
-                                setEditingProduct(prod);
-                                setProductForm({
-                                  name: prod.name,
-                                  type: prod.type,
-                                  salesPrice: prod.salesPrice,
-                                  costPrice: prod.costPrice,
-                                  notes: prod.notes || '',
-                                  isActive: prod.isActive,
-                                });
-                                setShowProductModal(true);
-                              }}
-                              className="p-1.5 text-zinc-400 hover:text-zinc-800 rounded-lg hover:bg-zinc-100"
-                              title="Edit Product"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteProduct(prod.id, prod.name)}
-                              className="p-1.5 text-zinc-400 hover:text-rose-600 rounded-lg hover:bg-rose-50"
-                              title="Delete Product"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
+                          {/* Admin Only Edit & Delete controls */}
+                          {isAdmin && (
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={() => {
+                                  setEditingProduct(prod);
+                                  setProductForm({
+                                    name: prod.name,
+                                    type: prod.type,
+                                    salesPrice: prod.salesPrice,
+                                    costPrice: prod.costPrice,
+                                    notes: prod.notes || '',
+                                    isActive: prod.isActive,
+                                  });
+                                  setShowProductModal(true);
+                                }}
+                                className="p-1.5 text-zinc-400 hover:text-zinc-800 rounded-lg hover:bg-zinc-100"
+                                title="Edit Product"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteProduct(prod.id, prod.name)}
+                                className="p-1.5 text-zinc-400 hover:text-rose-600 rounded-lg hover:bg-rose-50"
+                                title="Remove Product"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          )}
                         </div>
 
                         {/* Title & Description */}
@@ -560,8 +770,12 @@ export const ProductsPage: React.FC = () => {
                             </strong>
                           </div>
                           <div className="text-right">
-                            <span className="text-zinc-400 block text-[11px]">Gross Margin</span>
-                            <span className="font-bold text-emerald-600">{margin}%</span>
+                            <span className="text-zinc-400 block text-[11px]">
+                              {isAdmin ? 'Gross Margin' : 'Availability'}
+                            </span>
+                            <span className="font-bold text-emerald-600">
+                              {isAdmin ? `${margin}%` : 'In Stock'}
+                            </span>
                           </div>
                         </div>
 
@@ -572,22 +786,25 @@ export const ProductsPage: React.FC = () => {
                               <Sliders className="w-3.5 h-3.5 text-indigo-500" />
                               <span>Configured Variants ({prod.variants.length})</span>
                             </span>
-                            <button
-                              onClick={() => {
-                                setTargetProductForVariant(prod);
-                                setVariantForm({ name: '', priceAdjustment: 0 });
-                                setShowVariantModal(true);
-                              }}
-                              className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold"
-                            >
-                              + Add Variant
-                            </button>
+                            {/* Admin only: Add Variant button */}
+                            {isAdmin && (
+                              <button
+                                onClick={() => {
+                                  setTargetProductForVariant(prod);
+                                  setVariantForm({ name: '', priceAdjustment: 0 });
+                                  setShowVariantModal(true);
+                                }}
+                                className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold"
+                              >
+                                + Add Variant
+                              </button>
+                            )}
                           </div>
 
                           <div className="space-y-1.5">
                             {prod.variants.length === 0 ? (
                               <div className="text-xs text-zinc-400 italic bg-zinc-50/50 p-2.5 rounded-xl border border-dashed border-zinc-200 text-center">
-                                No variants configured yet.
+                                Standard edition only.
                               </div>
                             ) : (
                               prod.variants.map((v) => (
@@ -612,13 +829,16 @@ export const ProductsPage: React.FC = () => {
                                         ? `-$${Math.abs(v.priceAdjustment).toFixed(2)}`
                                         : '$0.00'}
                                     </span>
-                                    <button
-                                      onClick={() => handleDeleteVariant(prod.id, v.id, v.name)}
-                                      className="text-zinc-300 hover:text-rose-500 transition opacity-0 group-hover:opacity-100"
-                                      title="Remove Variant"
-                                    >
-                                      ✕
-                                    </button>
+                                    {/* Admin only: remove variant */}
+                                    {isAdmin && (
+                                      <button
+                                        onClick={() => handleDeleteVariant(prod.id, v.id, v.name)}
+                                        className="text-zinc-300 hover:text-rose-500 transition opacity-0 group-hover:opacity-100"
+                                        title="Remove Variant"
+                                      >
+                                        ✕
+                                      </button>
+                                    )}
                                   </div>
                                 </div>
                               ))
@@ -627,15 +847,41 @@ export const ProductsPage: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Status indicator */}
-                      <div className="pt-3 border-t border-zinc-150 flex items-center justify-between text-xs">
-                        <span className="text-zinc-400">Status</span>
-                        {prod.isActive ? (
-                          <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
-                          </span>
-                        ) : (
-                          <span className="text-zinc-400 font-medium">Inactive</span>
+                      {/* Card Footer: Role Actions */}
+                      <div className="pt-3 border-t border-zinc-150 space-y-3">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-zinc-400">Status</span>
+                          {prod.isActive ? (
+                            <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+                            </span>
+                          ) : (
+                            <span className="text-zinc-400 font-medium">Inactive</span>
+                          )}
+                        </div>
+
+                        {/* Customer: Ask for Custom Quotation */}
+                        {isCustomer && (
+                          <button
+                            onClick={() =>
+                              handleOpenQuoteRequest(prod.name, prod.salesPrice, prod.variants)
+                            }
+                            className="w-full py-2.5 px-3 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition"
+                          >
+                            <FileText className="w-3.5 h-3.5 text-indigo-400" />
+                            <span>Ask for Custom Quotation</span>
+                          </button>
+                        )}
+
+                        {/* Staff: Prepare Quotation for Customer */}
+                        {isStaff && (
+                          <button
+                            onClick={() => handleOpenStaffQuote(prod.name, prod.salesPrice)}
+                            className="w-full py-2.5 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition"
+                          >
+                            <FileText className="w-3.5 h-3.5 text-white" />
+                            <span>Prepare Quotation for Customer</span>
+                          </button>
                         )}
                       </div>
                     </div>
@@ -698,36 +944,39 @@ export const ProductsPage: React.FC = () => {
                             {pl.billingFrequency} CYCLE
                           </span>
 
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => {
-                                setEditingPlan(pl);
-                                setPlanForm({
-                                  name: pl.name,
-                                  description: pl.description || '',
-                                  price: pl.price,
-                                  billingFrequency: pl.billingFrequency,
-                                  minQuantity: pl.minQuantity,
-                                  canPause: pl.canPause,
-                                  canRenew: pl.canRenew,
-                                  autoClose: pl.autoClose,
-                                  isActive: pl.isActive,
-                                });
-                                setShowPlanModal(true);
-                              }}
-                              className="p-1.5 text-zinc-400 hover:text-zinc-800 rounded-lg hover:bg-zinc-100"
-                              title="Edit Plan"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleDeletePlan(pl.id, pl.name)}
-                              className="p-1.5 text-zinc-400 hover:text-rose-600 rounded-lg hover:bg-rose-50"
-                              title="Delete Plan"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
+                          {/* Admin only: edit and delete plan */}
+                          {isAdmin && (
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => {
+                                  setEditingPlan(pl);
+                                  setPlanForm({
+                                    name: pl.name,
+                                    description: pl.description || '',
+                                    price: pl.price,
+                                    billingFrequency: pl.billingFrequency,
+                                    minQuantity: pl.minQuantity,
+                                    canPause: pl.canPause,
+                                    canRenew: pl.canRenew,
+                                    autoClose: pl.autoClose,
+                                    isActive: pl.isActive,
+                                  });
+                                  setShowPlanModal(true);
+                                }}
+                                className="p-1.5 text-zinc-400 hover:text-zinc-800 rounded-lg hover:bg-zinc-100"
+                                title="Edit Plan"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleDeletePlan(pl.id, pl.name)}
+                                className="p-1.5 text-zinc-400 hover:text-rose-600 rounded-lg hover:bg-rose-50"
+                                title="Delete Plan"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          )}
                         </div>
 
                         <h3 className="text-xl font-bold text-zinc-950 tracking-tight leading-snug mb-2">
@@ -775,6 +1024,28 @@ export const ProductsPage: React.FC = () => {
                             <span>Auto-Renewable</span>
                           </div>
                         </div>
+
+                        {/* Customer Action: Request Quotation for Plan */}
+                        {isCustomer && (
+                          <button
+                            onClick={() => handleOpenQuoteRequest(pl.name, pl.price)}
+                            className="w-full py-2.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition"
+                          >
+                            <FileText className="w-3.5 h-3.5 text-white" />
+                            <span>Ask for Plan Quotation</span>
+                          </button>
+                        )}
+
+                        {/* Staff Action: Prepare Quotation for Plan */}
+                        {isStaff && (
+                          <button
+                            onClick={() => handleOpenStaffQuote(pl.name, pl.price)}
+                            className="w-full py-2.5 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition"
+                          >
+                            <FileText className="w-3.5 h-3.5 text-white" />
+                            <span>Prepare Quotation with this Plan</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -893,7 +1164,7 @@ export const ProductsPage: React.FC = () => {
                         <th className="py-3 font-semibold">Min Spend</th>
                         <th className="py-3 font-semibold">Usage</th>
                         <th className="py-3 font-semibold">Status</th>
-                        <th className="py-3 font-semibold text-right">Action</th>
+                        {isAdmin && <th className="py-3 font-semibold text-right">Action</th>}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-100">
@@ -925,15 +1196,17 @@ export const ProductsPage: React.FC = () => {
                               </span>
                             )}
                           </td>
-                          <td className="py-3.5 text-right">
-                            <button
-                              onClick={() => handleDeleteDiscount(rule.id, rule.code)}
-                              className="text-zinc-400 hover:text-rose-600 transition p-1"
-                              title="Delete Rule"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </td>
+                          {isAdmin && (
+                            <td className="py-3.5 text-right">
+                              <button
+                                onClick={() => handleDeleteDiscount(rule.id, rule.code)}
+                                className="text-zinc-400 hover:text-rose-600 transition p-1"
+                                title="Delete Rule"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </td>
+                          )}
                         </tr>
                       ))}
                     </tbody>
@@ -945,13 +1218,262 @@ export const ProductsPage: React.FC = () => {
         </>
       )}
 
-      {/* ================= MODAL: CREATE / EDIT PRODUCT ================= */}
-      {showProductModal && (
+      {/* ================= MODAL: CUSTOMER QUOTATION REQUEST ================= */}
+      {showQuoteRequestModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-zinc-150 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-zinc-950">Ask for Custom Quotation</h3>
+                  <p className="text-[11px] text-zinc-400">Direct request to Brightloop sales staff</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowQuoteRequestModal(false)}
+                className="text-zinc-400 hover:text-zinc-700 text-lg font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitQuoteRequest} className="space-y-4 text-xs">
+              <div>
+                <label className="font-semibold text-zinc-700 block mb-1">Product or Plan *</label>
+                <input
+                  type="text"
+                  required
+                  value={quoteRequestForm.planName}
+                  onChange={(e) =>
+                    setQuoteRequestForm({ ...quoteRequestForm, planName: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-600 font-medium"
+                />
+              </div>
+
+              {quoteRequestForm.availableVariants.length > 0 && (
+                <div>
+                  <label className="font-semibold text-zinc-700 block mb-1">
+                    Select Preferred Variant / Edition
+                  </label>
+                  <select
+                    value={quoteRequestForm.variantName}
+                    onChange={(e) =>
+                      setQuoteRequestForm({ ...quoteRequestForm, variantName: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  >
+                    {quoteRequestForm.availableVariants.map((v) => (
+                      <option key={v.id} value={v.name}>
+                        {v.name} ({v.priceAdjustment >= 0 ? `+$${v.priceAdjustment}` : `-$${Math.abs(v.priceAdjustment)}`})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-semibold text-zinc-700 block mb-1">Desired Quantity / Seats</label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={quoteRequestForm.quantity}
+                    onChange={(e) =>
+                      setQuoteRequestForm({
+                        ...quoteRequestForm,
+                        quantity: Math.max(1, Number(e.target.value)),
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-zinc-700 block mb-1">Customer Contact</label>
+                  <input
+                    type="text"
+                    disabled
+                    value={user?.email || 'customer@brightloop.com'}
+                    className="w-full px-3 py-2 border border-zinc-200 rounded-xl bg-zinc-50 text-zinc-500 cursor-not-allowed"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-semibold text-zinc-700 block mb-1">
+                  Specific Requirements or Notes
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Describe your organization's deployment needs, customizations, or SLA preferences..."
+                  value={quoteRequestForm.notes}
+                  onChange={(e) =>
+                    setQuoteRequestForm({ ...quoteRequestForm, notes: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                />
+              </div>
+
+              <div className="p-3 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-900 text-xs">
+                <strong>What happens next?</strong> A Brightloop staff specialist will review your request, apply eligible discounts, and prepare an official quotation accessible under your Subscriptions & Quotations portal.
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-150">
+                <button
+                  type="button"
+                  onClick={() => setShowQuoteRequestModal(false)}
+                  className="px-4 py-2 rounded-xl text-zinc-500 font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold shadow hover:bg-indigo-700 transition flex items-center gap-1.5"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Submit Quotation Request</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: STAFF PREPARE QUOTATION ================= */}
+      {showStaffQuoteModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-zinc-150 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center">
+                  <UserCheck className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-zinc-950">Prepare Customer Quotation</h3>
+                  <p className="text-[11px] text-zinc-400">Staff specialist commercial offer configuration</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowStaffQuoteModal(false)}
+                className="text-zinc-400 hover:text-zinc-700 text-lg font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitStaffQuote} className="space-y-4 text-xs">
+              <div>
+                <label className="font-semibold text-zinc-700 block mb-1">Target Customer</label>
+                <select
+                  value={staffQuoteForm.customerId}
+                  onChange={(e) =>
+                    setStaffQuoteForm({
+                      ...staffQuoteForm,
+                      customerId: e.target.value,
+                      customerEmail:
+                        e.target.value === 'cust-uuid-001'
+                          ? 'customer@brightloop.com'
+                          : 'client@enterprise.com',
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
+                >
+                  <option value="cust-uuid-001">Alex Rivera (Apex Retail Solutions Ltd.)</option>
+                  <option value="cust-external-002">Enterprise Client (client@enterprise.com)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="font-semibold text-zinc-700 block mb-1">Quotation / Plan Title *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Custom Multi-Company ERP Bundle"
+                  value={staffQuoteForm.planName}
+                  onChange={(e) =>
+                    setStaffQuoteForm({ ...staffQuoteForm, planName: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-semibold text-zinc-700 block mb-1">Total Agreed Price ($) *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    value={staffQuoteForm.totalAmount}
+                    onChange={(e) =>
+                      setStaffQuoteForm({ ...staffQuoteForm, totalAmount: Number(e.target.value) })
+                    }
+                    className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-zinc-700 block mb-1">Validity (Days)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="180"
+                    value={staffQuoteForm.validDays}
+                    onChange={(e) =>
+                      setStaffQuoteForm({
+                        ...staffQuoteForm,
+                        validDays: Number(e.target.value),
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-semibold text-zinc-700 block mb-1">Staff Terms & Commercial Notes</label>
+                <textarea
+                  rows={3}
+                  placeholder="Enter custom terms, payment schedules, or discount justifications..."
+                  value={staffQuoteForm.notes}
+                  onChange={(e) =>
+                    setStaffQuoteForm({ ...staffQuoteForm, notes: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-150">
+                <button
+                  type="button"
+                  onClick={() => setShowStaffQuoteModal(false)}
+                  className="px-4 py-2 rounded-xl text-zinc-500 font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-amber-600 text-white font-bold shadow hover:bg-amber-700 transition flex items-center gap-1.5"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Save & Dispatch Quotation</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: CREATE / EDIT PRODUCT (ADMIN ONLY) ================= */}
+      {isAdmin && showProductModal && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-zinc-150 pb-3">
               <h3 className="text-lg font-bold text-zinc-950">
-                {editingProduct ? 'Edit Product' : 'Create New Product'}
+                {editingProduct ? 'Edit Product' : 'Add New Product'}
               </h3>
               <button
                 onClick={() => setShowProductModal(false)}
@@ -1046,8 +1568,8 @@ export const ProductsPage: React.FC = () => {
         </div>
       )}
 
-      {/* ================= MODAL: ADD VARIANT ================= */}
-      {showVariantModal && targetProductForVariant && (
+      {/* ================= MODAL: ADD VARIANT (ADMIN ONLY) ================= */}
+      {isAdmin && showVariantModal && targetProductForVariant && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-zinc-150 pb-3">
@@ -1112,8 +1634,8 @@ export const ProductsPage: React.FC = () => {
         </div>
       )}
 
-      {/* ================= MODAL: CREATE / EDIT PLAN ================= */}
-      {showPlanModal && (
+      {/* ================= MODAL: CREATE / EDIT PLAN (ADMIN ONLY) ================= */}
+      {isAdmin && showPlanModal && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-zinc-150 pb-3">
@@ -1234,8 +1756,8 @@ export const ProductsPage: React.FC = () => {
         </div>
       )}
 
-      {/* ================= MODAL: CREATE DISCOUNT ================= */}
-      {showDiscountModal && (
+      {/* ================= MODAL: CREATE DISCOUNT (ADMIN ONLY) ================= */}
+      {isAdmin && showDiscountModal && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-zinc-150 pb-3">

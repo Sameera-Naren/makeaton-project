@@ -8,6 +8,8 @@ import {
   Plan,
   Product,
   ProductVariant,
+  Quotation,
+  QuotationStatus,
   User,
 } from '../types';
 import { mockFallback } from './mockFallback';
@@ -446,6 +448,72 @@ export const api = {
         `/products/discounts/${id}`,
         { method: 'DELETE' },
         () => mockFallback.deleteDiscount(id)
+      );
+    },
+  },
+
+  subscriptions: {
+    getAll: async (): Promise<CustomerSubscription[]> => {
+      return safeRequest<CustomerSubscription[]>(
+        '/subscriptions/all',
+        {},
+        () => mockFallback.getAllSubscriptions()
+      );
+    },
+
+    getQuotations: async (customerId?: string): Promise<Quotation[]> => {
+      return safeRequest<Quotation[]>(
+        `/subscriptions/quotations${customerId ? `?customerId=${customerId}` : ''}`,
+        {},
+        () => mockFallback.getQuotations(customerId)
+      );
+    },
+
+    requestQuotation: async (data: {
+      planName?: string;
+      notes: string;
+      estimatedAmount?: number;
+      items?: any[];
+    }): Promise<Quotation> => {
+      return safeRequest<Quotation>(
+        '/subscriptions/quotations/request',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        () => mockFallback.createQuotationRequest(data)
+      );
+    },
+
+    prepareQuotation: async (data: {
+      customerId: string;
+      planName: string;
+      totalAmount: number;
+      notes?: string;
+      validDays?: number;
+      items?: any[];
+    }): Promise<Quotation> => {
+      return safeRequest<Quotation>(
+        '/subscriptions/quotations',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        },
+        () => mockFallback.prepareStaffQuotation(data)
+      );
+    },
+
+    updateQuotationStatus: async (
+      id: string,
+      status: QuotationStatus
+    ): Promise<Quotation> => {
+      return safeRequest<Quotation>(
+        `/subscriptions/quotations/${id}/status`,
+        {
+          method: 'PUT',
+          body: JSON.stringify({ status }),
+        },
+        () => mockFallback.updateQuotationStatus(id, status)
       );
     },
   },
