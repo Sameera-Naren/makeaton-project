@@ -139,7 +139,7 @@ export const payInvoice = (req: AuthenticatedRequest, res: Response): void => {
 
     res.status(200).json({
       success: true,
-      message: `Payment of $${invoice.totalAmount.toFixed(2)} recorded successfully for Invoice ${invoice.invoiceNumber}.`,
+      message: `Payment of ₹${invoice.totalAmount.toFixed(2)} recorded successfully for Invoice ${invoice.invoiceNumber}.`,
       data: result,
     });
   } catch (error: any) {

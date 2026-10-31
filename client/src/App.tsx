@@ -34,7 +34,7 @@ const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
       <footer className="border-t border-zinc-200/80 bg-white py-6 text-center text-xs text-zinc-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>Brightloop Software Platform — Hackathon 2026 Edition</span>
-          <span className="text-zinc-400">Team Modular Monolith • Member 1 &amp; Member 3 Integrated</span>
+          <span className="text-zinc-400">Enterprise Subscription &amp; Customer Billing Suite</span>
         </div>
       </footer>
     </div>
@@ -55,7 +55,7 @@ export const App: React.FC = () => {
               </ProtectedLayout>
             }
           />
-          {/* Member 3: Quotations Routes */}
+          {/* Quotations Routes */}
           <Route
             path="/quotations"
             element={

@@ -172,7 +172,7 @@ class Store {
       },
     ];
 
-    // Seed Member 3 Quotations
+    // Seed Quotations
     this.quotations = [
       {
         id: 'quo-001',
@@ -516,7 +516,7 @@ class Store {
   }
 
   // ==========================================
-  // MEMBER 3: QUOTATIONS METHODS
+  // QUOTATIONS METHODS
   // ==========================================
 
   getQuotations(filters?: { status?: string; customerId?: string }): Quotation[] {
@@ -753,7 +753,7 @@ class Store {
   }
 
   // ==========================================
-  // MEMBER 3: SUBSCRIPTIONS METHODS
+  // SUBSCRIPTIONS METHODS
   // ==========================================
 
   getAllSubscriptions(): CustomerSubscription[] {

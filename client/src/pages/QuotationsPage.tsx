@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { Quotation, QuotationStatus } from '../types';
 import { CardWithArrow } from '../components/CardWithArrow';
+import { formatINR, formatINRCompact } from '../utils/currency';
 import {
   FileText,
   Plus,
@@ -94,7 +95,7 @@ export const QuotationsPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <span className="px-3 py-1 rounded-full text-xs font-bold tracking-tight bg-pastel-blue text-indigo-950">
-              Member 3 • Sales &amp; Subscriptions Engine
+              Enterprise Sales &amp; Proposals Engine
             </span>
             <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
               Brightloop Platform
@@ -154,7 +155,7 @@ export const QuotationsPage: React.FC = () => {
         />
 
         <CardWithArrow
-          pillText={`$${totalValue.toLocaleString('en-US', { minimumFractionDigits: 0 })} Pipeline`}
+          pillText={`${formatINRCompact(totalValue)} Pipeline`}
           pillColor="bg-pastel-green text-emerald-950 font-bold"
           title="Converted Subscriptions"
           description="Live contracts seamlessly spawned from accepted quotations without duplicate re-entry."
@@ -276,7 +277,7 @@ export const QuotationsPage: React.FC = () => {
                     </td>
 
                     <td className="py-4 px-4 text-right font-mono font-black text-zinc-950 text-base">
-                      ${q.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      {formatINR(q.totalAmount)}
                     </td>
 
                     <td className="py-4 px-4 text-center">

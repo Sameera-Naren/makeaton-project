@@ -135,7 +135,7 @@ export const api = {
   },
 
   // ==========================================
-  // MEMBER 3: QUOTATIONS API
+  // QUOTATIONS API
   // ==========================================
   quotations: {
     getAll: async (status?: string): Promise<Quotation[]> => {
@@ -194,7 +194,7 @@ export const api = {
   },
 
   // ==========================================
-  // MEMBER 3: SUBSCRIPTIONS (STAFF/ADMIN)
+  // SUBSCRIPTIONS (STAFF/ADMIN)
   // ==========================================
   subscriptions: {
     getAll: async (): Promise<CustomerSubscription[]> => {

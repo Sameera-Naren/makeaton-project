@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { authenticateToken, requireRole } from '../../middleware/auth.middleware.js';
 import { dbStore } from '../../lib/store.js';
 
-// MEMBER 3 - QUOTATIONS & SUBSCRIPTIONS MODULE
+// QUOTATIONS & SUBSCRIPTIONS MODULE
 const router = Router();
 
 // ==========================================

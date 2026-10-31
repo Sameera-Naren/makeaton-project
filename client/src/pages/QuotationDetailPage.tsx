@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { Quotation, QuotationStatus } from '../types';
+import { formatINR } from '../utils/currency';
 import {
   ArrowLeft,
   CheckCircle,
@@ -306,16 +307,16 @@ export const QuotationDetailPage: React.FC = () => {
                     {line.quantity}
                   </td>
                   <td className="py-3.5 px-4 text-right font-mono text-zinc-600">
-                    ${line.unitPrice.toFixed(2)}
+                    {formatINR(line.unitPrice)}
                   </td>
                   <td className="py-3.5 px-4 text-right font-mono text-emerald-600">
-                    {line.discount > 0 ? `-$${line.discount.toFixed(2)}` : '—'}
+                    {line.discount > 0 ? `-${formatINR(line.discount)}` : '—'}
                   </td>
                   <td className="py-3.5 px-4 text-right text-zinc-500">
                     {line.taxRate}%
                   </td>
                   <td className="py-3.5 px-4 text-right font-mono font-bold text-zinc-950">
-                    ${line.amount.toFixed(2)}
+                    {formatINR(line.amount)}
                   </td>
                 </tr>
               ))}
@@ -326,7 +327,7 @@ export const QuotationDetailPage: React.FC = () => {
                   Subtotal:
                 </td>
                 <td className="py-2.5 px-4 text-right font-mono">
-                  ${(quotation.subtotal || 0).toFixed(2)}
+                  {formatINR(quotation.subtotal)}
                 </td>
               </tr>
               {quotation.discountAmount > 0 && (
@@ -335,7 +336,7 @@ export const QuotationDetailPage: React.FC = () => {
                     Total Discounts:
                   </td>
                   <td className="py-2 px-4 text-right font-mono text-emerald-600">
-                    -${quotation.discountAmount.toFixed(2)}
+                    -{formatINR(quotation.discountAmount)}
                   </td>
                 </tr>
               )}
@@ -345,7 +346,7 @@ export const QuotationDetailPage: React.FC = () => {
                     Total Taxes:
                   </td>
                   <td className="py-2 px-4 text-right font-mono">
-                    +${quotation.taxAmount.toFixed(2)}
+                    +{formatINR(quotation.taxAmount)}
                   </td>
                 </tr>
               )}
@@ -354,7 +355,7 @@ export const QuotationDetailPage: React.FC = () => {
                   Agreed Total Quotation Amount:
                 </td>
                 <td className="py-3 px-4 text-right font-mono font-black text-indigo-600 text-base">
-                  ${(quotation.totalAmount || 0).toFixed(2)}
+                  {formatINR(quotation.totalAmount)}
                 </td>
               </tr>
             </tfoot>

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { authenticateToken, requireRole } from '../../middleware/auth.middleware.js';
 
-// MEMBER 2 - PRODUCTS, PLANS & DISCOUNTS MODULE
+// PRODUCTS, PLANS & DISCOUNTS MODULE
 const router = Router();
 
 // Demo products data
@@ -77,11 +77,11 @@ router.get('/plans', (req, res) => {
   res.json({ success: true, data: demoPlans });
 });
 
-// Admin product creation stub (Member 2 hook)
+// Admin product creation hook
 router.post('/', authenticateToken, requireRole('ADMIN'), (req, res) => {
   res.status(201).json({
     success: true,
-    message: 'Product created successfully (Member 2 Module).',
+    message: 'Product created successfully.',
     data: req.body,
   });
 });

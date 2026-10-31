@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authenticateToken, requireRole } from '../../middleware/auth.middleware.js';
 import { dbStore } from '../../lib/store.js';
 
-// MEMBER 4 - BILLING, PAYMENTS & ANALYTICS MODULE
+// BILLING, PAYMENTS & ANALYTICS MODULE
 const router = Router();
 
 // Staff/Admin view all invoices
@@ -21,7 +21,7 @@ router.get('/payments', authenticateToken, requireRole('ADMIN', 'STAFF'), (req, 
   });
 });
 
-// Analytics overview (Member 4 hook)
+// Analytics overview
 router.get('/analytics/overview', authenticateToken, requireRole('ADMIN', 'STAFF'), (req, res) => {
   const activeSubs = dbStore.subscriptions.filter((s) => s.status === 'ACTIVE').length;
   const totalRevenue = dbStore.payments.reduce((acc, p) => acc + p.amount, 0);

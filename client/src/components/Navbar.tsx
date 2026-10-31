@@ -14,7 +14,7 @@ export const Navbar: React.FC = () => {
 
   const navLinks = [
     { name: 'Dashboard', path: '/' },
-    { name: 'Quotations', path: '/quotations', highlight: true },
+    { name: 'Quotations', path: '/quotations' },
     { name: 'Subscriptions', path: '/subscriptions' },
     { name: 'Invoices', path: '/invoices' },
     { name: 'Payments', path: '/payments' },
@@ -29,7 +29,7 @@ export const Navbar: React.FC = () => {
           <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span className="font-semibold text-zinc-100">Brightloop Subscription Platform</span>
           <span className="hidden sm:inline text-zinc-500">|</span>
-          <span className="hidden sm:inline text-zinc-400">Member 1 &amp; Member 3 Active Modules</span>
+          <span className="hidden sm:inline text-zinc-400">Enterprise Operations &amp; Billing</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-zinc-400">Quick Switch:</span>
@@ -100,11 +100,6 @@ export const Navbar: React.FC = () => {
               }
             >
               <span>{link.name}</span>
-              {link.highlight && (
-                <span className="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold bg-pastel-blue text-indigo-950">
-                  M3
-                </span>
-              )}
             </NavLink>
           ))}
         </nav>

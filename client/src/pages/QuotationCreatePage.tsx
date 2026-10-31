@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { User } from '../types';
+import { formatINR } from '../utils/currency';
 import {
   ArrowLeft,
   Plus,
@@ -374,7 +375,7 @@ export const QuotationCreatePage: React.FC = () => {
                     >
                       {products.map((p) => (
                         <option key={p.id} value={p.id}>
-                          {p.name} (${p.salesPrice})
+                          {p.name} ({formatINR(p.salesPrice)})
                         </option>
                       ))}
                     </select>
@@ -389,7 +390,7 @@ export const QuotationCreatePage: React.FC = () => {
                         >
                           {currentProd.variants.map((v: any) => (
                             <option key={v.id} value={v.id}>
-                              Variant: {v.name} (+${v.priceAdjustment})
+                              Variant: {v.name} (+{formatINR(v.priceAdjustment)})
                             </option>
                           ))}
                         </select>
@@ -416,7 +417,7 @@ export const QuotationCreatePage: React.FC = () => {
                   {/* Unit Price */}
                   <div className="md:col-span-2">
                     <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1">
-                      Unit Price ($)
+                      Unit Price (₹)
                     </label>
                     <input
                       type="number"
@@ -433,7 +434,7 @@ export const QuotationCreatePage: React.FC = () => {
                   {/* Discount */}
                   <div className="md:col-span-1">
                     <label className="block text-[11px] font-bold text-zinc-500 uppercase tracking-wider mb-1">
-                      Disc ($)
+                      Disc (₹)
                     </label>
                     <input
                       type="number"
@@ -468,7 +469,7 @@ export const QuotationCreatePage: React.FC = () => {
                       Total
                     </label>
                     <span className="text-xs font-bold font-mono text-zinc-950 block py-2">
-                      ${lineFinal.toFixed(2)}
+                      {formatINR(lineFinal)}
                     </span>
                   </div>
 
@@ -499,15 +500,15 @@ export const QuotationCreatePage: React.FC = () => {
             <div className="space-y-1 text-xs text-zinc-600">
               <div className="flex items-center gap-4">
                 <span className="w-28 text-zinc-500">Items Subtotal:</span>
-                <span className="font-mono font-bold">${subtotal.toFixed(2)}</span>
+                <span className="font-mono font-bold">{formatINR(subtotal)}</span>
               </div>
               <div className="flex items-center gap-4">
                 <span className="w-28 text-zinc-500">Total Discounts:</span>
-                <span className="font-mono font-bold text-emerald-600">-${totalDiscount.toFixed(2)}</span>
+                <span className="font-mono font-bold text-emerald-600">-{formatINR(totalDiscount)}</span>
               </div>
               <div className="flex items-center gap-4">
                 <span className="w-28 text-zinc-500">Total Taxes:</span>
-                <span className="font-mono font-bold">+${totalTax.toFixed(2)}</span>
+                <span className="font-mono font-bold">+{formatINR(totalTax)}</span>
               </div>
             </div>
           </div>
@@ -518,7 +519,7 @@ export const QuotationCreatePage: React.FC = () => {
                 Agreed Total Amount
               </span>
               <span className="text-3xl font-black font-mono text-zinc-950 tracking-tight">
-                ${totalAmount.toFixed(2)}
+                {formatINR(totalAmount)}
               </span>
             </div>
 

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { CustomerPayment } from '../types';
+import { formatINR } from '../utils/currency';
 import {
   CreditCard,
   CheckCircle2,
   Calendar,
   FileText,
-  DollarSign,
   Receipt,
   Download,
   Zap,
@@ -41,7 +41,7 @@ export const PaymentsPage: React.FC = () => {
       case 'BANK_TRANSFER':
         return <Zap className="w-4 h-4 text-amber-600" />;
       default:
-        return <DollarSign className="w-4 h-4 text-emerald-600" />;
+        return <CreditCard className="w-4 h-4 text-emerald-600" />;
     }
   };
 
@@ -51,10 +51,10 @@ export const PaymentsPage: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-            Ledger & Remittance
+            Ledger &amp; Remittance
           </span>
           <h1 className="text-3xl font-extrabold text-zinc-950 tracking-tight">
-            Payment History & Receipts
+            Payment History &amp; Receipts
           </h1>
           <p className="text-zinc-500 text-sm mt-1">
             Complete transaction history for all subscription charges and settled invoices.
@@ -71,7 +71,7 @@ export const PaymentsPage: React.FC = () => {
               Total Settled Payments
             </span>
             <span className="text-xl font-extrabold text-zinc-950 font-mono">
-              ${totalSettled.toFixed(2)}
+              {formatINR(totalSettled)}
             </span>
           </div>
         </div>
@@ -83,49 +83,44 @@ export const PaymentsPage: React.FC = () => {
           <p className="text-xs text-zinc-400 mt-2 font-medium">Fetching payment records...</p>
         </div>
       ) : payments.length === 0 ? (
-        <div className="bg-white rounded-3xl p-12 border border-zinc-200 text-center text-zinc-500">
-          <Receipt className="w-12 h-12 text-zinc-300 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-zinc-900">No payment records found</h3>
-          <p className="text-xs text-zinc-400 mt-1">
-            Settled invoices will automatically register payment receipts here.
-          </p>
+        <div className="bg-white rounded-3xl border border-zinc-200 p-12 text-center text-zinc-400">
+          No payments recorded yet.
         </div>
       ) : (
-        <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-3xl border border-zinc-200/80 p-6 sm:p-8 shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-zinc-50 border-b border-zinc-150 text-xs font-bold text-zinc-500 uppercase tracking-wider">
+              <thead className="bg-zinc-50/80 border-b border-zinc-150 text-xs font-bold text-zinc-500 uppercase tracking-wider">
                 <tr>
-                  <th className="py-4 px-6">Payment Reference</th>
-                  <th className="py-4 px-6">Invoice #</th>
-                  <th className="py-4 px-6">Payment Method</th>
-                  <th className="py-4 px-6">Date & Time</th>
-                  <th className="py-4 px-6">Reference / Gateway Note</th>
-                  <th className="py-4 px-6 text-right">Amount Paid</th>
-                  <th className="py-4 px-6 text-center">Status</th>
+                  <th className="py-3 px-6 rounded-l-xl">Receipt ID</th>
+                  <th className="py-3 px-6">Invoice Ref</th>
+                  <th className="py-3 px-6">Payment Method</th>
+                  <th className="py-3 px-6">Processed Date</th>
+                  <th className="py-3 px-6">Reference / Gateway</th>
+                  <th className="py-3 px-6 text-right">Amount Paid</th>
+                  <th className="py-3 px-6 text-center rounded-r-xl">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
                 {payments.map((p) => (
-                  <tr key={p.id} className="hover:bg-zinc-50/60 transition">
-                    <td className="py-4 px-6 font-mono font-bold text-zinc-950 flex items-center gap-2">
-                      <Receipt className="w-4 h-4 text-zinc-400" />
-                      <span>{p.paymentNumber}</span>
+                  <tr key={p.id} className="hover:bg-zinc-50/50">
+                    <td className="py-4 px-6 font-mono font-bold text-zinc-950">
+                      {p.paymentNumber}
                     </td>
-                    <td className="py-4 px-6 text-xs font-semibold text-indigo-600">
+                    <td className="py-4 px-6 font-mono text-xs font-medium text-indigo-600">
                       {p.invoiceNumber}
                     </td>
                     <td className="py-4 px-6">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-700 bg-zinc-100 px-2.5 py-1 rounded-full">
+                      <div className="flex items-center gap-2 text-xs font-semibold text-zinc-700">
                         {getMethodIcon(p.paymentMethod)}
                         <span>{p.paymentMethod.replace('_', ' ')}</span>
-                      </span>
+                      </div>
                     </td>
                     <td className="py-4 px-6 text-xs text-zinc-600">
-                      {new Date(p.paymentDate).toLocaleString(undefined, {
+                      {new Date(p.paymentDate).toLocaleDateString(undefined, {
+                        year: 'numeric',
                         month: 'short',
                         day: 'numeric',
-                        year: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit',
                       })}
@@ -134,7 +129,7 @@ export const PaymentsPage: React.FC = () => {
                       {p.referenceNote || 'Direct bank settlement'}
                     </td>
                     <td className="py-4 px-6 text-right font-mono font-bold text-zinc-950 text-sm">
-                      ${p.amount.toFixed(2)}
+                      {formatINR(p.amount)}
                     </td>
                     <td className="py-4 px-6 text-center">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">

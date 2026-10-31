@@ -3,13 +3,13 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { CustomerDashboardSummary, CustomerInvoice } from '../types';
 import { CardWithArrow } from '../components/CardWithArrow';
+import { formatINR } from '../utils/currency';
 import {
   CreditCard,
   Calendar,
   CheckCircle2,
   AlertCircle,
   FileText,
-  DollarSign,
   ArrowRight,
   Sparkles,
   ShieldAlert,
@@ -168,7 +168,7 @@ export const CustomerDashboard: React.FC = () => {
               <span className="text-4xl font-extrabold text-zinc-950">
                 {metrics.activeSubscriptionsCount}
               </span>
-              <p className="text-xs text-indigo-600 mt-1">Healthy & Running</p>
+              <p className="text-xs text-indigo-600 mt-1">Healthy &amp; Running</p>
             </div>
             <button
               onClick={() => navigate('/subscriptions')}
@@ -185,8 +185,8 @@ export const CustomerDashboard: React.FC = () => {
               Outstanding Due
             </span>
             <div className="my-4">
-              <span className="text-3xl font-extrabold text-zinc-950">
-                ${metrics.outstandingAmount.toFixed(2)}
+              <span className="text-2xl sm:text-3xl font-extrabold text-zinc-950">
+                {formatINR(metrics.outstandingAmount)}
               </span>
               <p className="text-xs text-amber-700 mt-1">
                 {metrics.outstandingAmount > 0 ? 'Payment Pending' : 'All Settled'}
@@ -248,12 +248,12 @@ export const CustomerDashboard: React.FC = () => {
         <div className="bg-zinc-900 text-white rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-amber-400 text-zinc-950 flex items-center justify-center font-bold text-xl flex-shrink-0">
-              $
+              ₹
             </div>
             <div>
               <h3 className="text-lg font-bold">Outstanding Invoices Awaiting Settlement</h3>
               <p className="text-zinc-400 text-sm mt-0.5">
-                You have ${metrics.outstandingAmount.toFixed(2)} pending payment. Settle now to maintain uninterrupted cloud services.
+                You have {formatINR(metrics.outstandingAmount)} pending payment. Settle now to maintain uninterrupted cloud services.
               </p>
             </div>
           </div>
@@ -266,135 +266,135 @@ export const CustomerDashboard: React.FC = () => {
                 navigate('/invoices');
               }
             }}
-            className="w-full sm:w-auto px-6 py-3 rounded-full bg-white text-zinc-950 font-bold text-sm hover:bg-zinc-100 transition whitespace-nowrap"
+            className="px-6 py-3 rounded-full bg-white text-zinc-950 font-bold text-xs hover:bg-zinc-100 transition whitespace-nowrap"
           >
-            Pay Balance Now
+            Settle Immediate Balance
           </button>
         </div>
       )}
 
-      {/* SECTION 1: Active Subscriptions Cards (Reference UI Layout) */}
-      <section className="space-y-6">
+      {/* Reference 1 Style Playful Split Cards for Active Subscriptions */}
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-extrabold text-zinc-950 tracking-tight">
-              Active Subscriptions
+            <h2 className="text-2xl font-black text-zinc-950 tracking-tight">
+              Active Cloud Subscriptions
             </h2>
-            <p className="text-zinc-500 text-sm">
-              Your ongoing Brightloop software plans, add-ons, and service terms
+            <p className="text-xs text-zinc-500 mt-0.5">
+              Current subscribed software packages and license tiers
             </p>
           </div>
           <button
             onClick={() => navigate('/subscriptions')}
-            className="text-xs font-semibold text-zinc-700 hover:text-zinc-950 flex items-center gap-1 border border-zinc-200 px-3 py-1.5 rounded-full"
+            className="text-xs font-bold text-zinc-700 hover:text-black flex items-center gap-1"
+          >
+            <span>All Subscriptions</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {activeSubscriptions.length === 0 ? (
+          <div className="bg-white rounded-3xl border border-zinc-200 p-8 text-center text-zinc-500">
+            No active subscriptions found.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {activeSubscriptions.map((sub, idx) => {
+              const colors = ['bg-pastel-blue', 'bg-pastel-yellow', 'bg-pastel-purple'];
+              const bg = colors[idx % colors.length];
+
+              return (
+                <CardWithArrow
+                  key={sub.id}
+                  pillText={`${sub.billingFrequency} BILLING`}
+                  pillColor="bg-white/80 text-zinc-800 font-bold border border-black/5"
+                  title={sub.planName}
+                  description={sub.notes || 'Enterprise subscription license.'}
+                  bottomBgColor={bg}
+                  onArrowClick={() => navigate('/subscriptions')}
+                  bottomContent={
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-zinc-900 uppercase tracking-wide">
+                          {sub.subscriptionNumber}
+                        </span>
+                        <span className="text-sm font-extrabold text-zinc-950">
+                          {formatINR(sub.totalAmount)}
+                          <span className="text-xs font-normal text-zinc-700">
+                            /{sub.billingFrequency.toLowerCase()}
+                          </span>
+                        </span>
+                      </div>
+
+                      <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 text-xs space-y-1.5 border border-black/5">
+                        {sub.lines.slice(0, 2).map((line) => (
+                          <div key={line.id} className="flex justify-between items-center text-zinc-800">
+                            <span className="truncate pr-2 font-medium">
+                              {line.quantity}x {line.productName}
+                            </span>
+                            <span className="font-semibold text-zinc-950 whitespace-nowrap">
+                              {formatINR(line.amount)}
+                            </span>
+                          </div>
+                        ))}
+                        {sub.lines.length > 2 && (
+                          <div className="text-[11px] text-zinc-500 italic pt-1">
+                            + {sub.lines.length - 2} additional variant lines
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between pt-1 text-[11px] text-zinc-800 font-medium">
+                        <span>Auto-renew: {sub.autoRenew ? 'Active' : 'Off'}</span>
+                        <span className="underline cursor-pointer" onClick={() => navigate('/subscriptions')}>
+                          Manage →
+                        </span>
+                      </div>
+                    </div>
+                  }
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Recent Invoices Table */}
+      <div className="bg-white rounded-3xl border border-zinc-200/80 p-6 sm:p-8 shadow-sm space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-bold text-zinc-950 tracking-tight">Recent Invoices</h3>
+            <p className="text-xs text-zinc-500 mt-0.5">Automated recurring billing ledger</p>
+          </div>
+          <button
+            onClick={() => navigate('/invoices')}
+            className="text-xs font-bold text-zinc-700 hover:text-black flex items-center gap-1"
           >
             <span>View All</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {activeSubscriptions.map((sub, idx) => {
-            const pastelBgs = ['bg-[#c7d2fe]', 'bg-[#fef08a]', 'bg-[#ddd6fe]'];
-            const bg = pastelBgs[idx % pastelBgs.length];
-
-            return (
-              <CardWithArrow
-                key={sub.id}
-                pillText={`${sub.billingFrequency} BILLING`}
-                pillColor="bg-zinc-950 text-white"
-                title={sub.planName}
-                description={
-                  sub.notes ||
-                  'Enterprise-grade subscription with automated renewals and premium support.'
-                }
-                bottomBgColor={bg}
-                onArrowClick={() => navigate('/subscriptions')}
-                bottomContent={
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-zinc-900 uppercase tracking-wide">
-                        {sub.subscriptionNumber}
-                      </span>
-                      <span className="text-sm font-extrabold text-zinc-950">
-                        ${sub.totalAmount.toFixed(2)}
-                        <span className="text-xs font-normal text-zinc-700">
-                          /{sub.billingFrequency.toLowerCase()}
-                        </span>
-                      </span>
-                    </div>
-
-                    <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 text-xs space-y-1.5 border border-black/5">
-                      {sub.lines.slice(0, 2).map((line) => (
-                        <div key={line.id} className="flex justify-between items-center text-zinc-800">
-                          <span className="truncate pr-2 font-medium">
-                            {line.quantity}x {line.productName}
-                          </span>
-                          <span className="font-semibold text-zinc-950 whitespace-nowrap">
-                            ${line.amount.toFixed(2)}
-                          </span>
-                        </div>
-                      ))}
-                      {sub.lines.length > 2 && (
-                        <div className="text-[11px] text-zinc-500 italic pt-1">
-                          + {sub.lines.length - 2} additional variant lines
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-center justify-between pt-1 text-[11px] text-zinc-800 font-medium">
-                      <span>Terms: {sub.paymentTerms}</span>
-                      <span className="flex items-center gap-1 text-emerald-800 font-semibold">
-                        <CheckCircle2 className="w-3 h-3" /> Auto-Renew On
-                      </span>
-                    </div>
-                  </div>
-                }
-              />
-            );
-          })}
-        </div>
-      </section>
-
-      {/* SECTION 2: Invoices & Billing Quick View */}
-      <section className="space-y-6 pt-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-extrabold text-zinc-950 tracking-tight">
-              Recent Invoices
-            </h2>
-            <p className="text-zinc-500 text-sm">
-              Track invoices, tax calculations, discounts, and payment receipts
-            </p>
-          </div>
-          <button
-            onClick={() => navigate('/invoices')}
-            className="text-xs font-semibold text-zinc-700 hover:text-zinc-950 flex items-center gap-1 border border-zinc-200 px-3 py-1.5 rounded-full"
-          >
-            <span>All Invoices</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        <div className="bg-white rounded-3xl border border-zinc-150 shadow-sm overflow-hidden">
+        {recentInvoices.length === 0 ? (
+          <p className="text-sm text-zinc-500">No recent invoices.</p>
+        ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-zinc-50 border-b border-zinc-100 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+              <thead className="bg-zinc-50/80 border-b border-zinc-150 text-xs font-bold text-zinc-500 uppercase tracking-wider">
                 <tr>
-                  <th className="py-4 px-6">Invoice #</th>
-                  <th className="py-4 px-6">Issue Date</th>
-                  <th className="py-4 px-6">Due Date</th>
-                  <th className="py-4 px-6">Total Amount</th>
-                  <th className="py-4 px-6">Status</th>
-                  <th className="py-4 px-6 text-right">Action</th>
+                  <th className="py-3 px-6 rounded-l-xl">Invoice #</th>
+                  <th className="py-3 px-6">Issue Date</th>
+                  <th className="py-3 px-6">Due Date</th>
+                  <th className="py-3 px-6">Amount</th>
+                  <th className="py-3 px-6">Status</th>
+                  <th className="py-3 px-6 text-right rounded-r-xl">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
                 {recentInvoices.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-zinc-50/60 transition">
-                    <td className="py-4 px-6 font-semibold text-zinc-950 flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-zinc-400" />
-                      <span>{inv.invoiceNumber}</span>
+                  <tr key={inv.id} className="hover:bg-zinc-50/50">
+                    <td className="py-4 px-6 font-mono font-bold text-zinc-950">
+                      {inv.invoiceNumber}
                     </td>
                     <td className="py-4 px-6 text-zinc-600">
                       {new Date(inv.issueDate).toLocaleDateString()}
@@ -403,10 +403,10 @@ export const CustomerDashboard: React.FC = () => {
                       {new Date(inv.dueDate).toLocaleDateString()}
                     </td>
                     <td className="py-4 px-6 font-bold text-zinc-950">
-                      ${inv.totalAmount.toFixed(2)}
+                      {formatINR(inv.totalAmount)}
                       {inv.discountAmount > 0 && (
                         <span className="block text-[10px] text-emerald-600 font-normal">
-                          -${inv.discountAmount.toFixed(2)} discount applied
+                          -{formatINR(inv.discountAmount)} discount applied
                         </span>
                       )}
                     </td>
@@ -423,16 +423,16 @@ export const CustomerDashboard: React.FC = () => {
                         {inv.status}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-right space-x-2">
+                    <td className="py-4 px-6 text-right">
                       {inv.status !== 'PAID' ? (
                         <button
                           onClick={() => setPayingInvoice(inv)}
-                          className="px-3 py-1.5 bg-black hover:bg-zinc-800 text-white rounded-full text-xs font-semibold transition"
+                          className="px-3.5 py-1.5 rounded-full bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-semibold shadow-sm transition"
                         >
                           Pay Now
                         </button>
                       ) : (
-                        <span className="text-xs text-emerald-600 font-medium">Cleared</span>
+                        <span className="text-xs text-zinc-400 font-medium">Settled</span>
                       )}
                     </td>
                   </tr>
@@ -440,20 +440,20 @@ export const CustomerDashboard: React.FC = () => {
               </tbody>
             </table>
           </div>
-        </div>
-      </section>
+        )}
+      </div>
 
-      {/* Quick Pay Invoice Modal */}
+      {/* Pay Invoice Modal */}
       {payingInvoice && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-zinc-200 shadow-2xl space-y-6">
-            <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-zinc-200 shadow-2xl space-y-6 animate-scaleIn">
+            <div className="flex items-center justify-between border-b border-zinc-150 pb-4">
               <div>
-                <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                  Payment Remittance
+                <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                  Instant Payment
                 </span>
-                <h3 className="text-2xl font-extrabold text-zinc-950">
-                  Pay Invoice {payingInvoice.invoiceNumber}
+                <h3 className="text-2xl font-black text-zinc-950 tracking-tight">
+                  Settle {payingInvoice.invoiceNumber}
                 </h3>
               </div>
               <button
@@ -467,23 +467,23 @@ export const CustomerDashboard: React.FC = () => {
             <div className="bg-zinc-50 rounded-2xl p-4 space-y-2 text-sm border border-zinc-100">
               <div className="flex justify-between text-zinc-600">
                 <span>Subtotal:</span>
-                <span>${payingInvoice.subtotal.toFixed(2)}</span>
+                <span>{formatINR(payingInvoice.subtotal)}</span>
               </div>
               {payingInvoice.taxAmount > 0 && (
                 <div className="flex justify-between text-zinc-600">
                   <span>Taxes:</span>
-                  <span>+${payingInvoice.taxAmount.toFixed(2)}</span>
+                  <span>+{formatINR(payingInvoice.taxAmount)}</span>
                 </div>
               )}
               {payingInvoice.discountAmount > 0 && (
                 <div className="flex justify-between text-emerald-600 font-medium">
                   <span>Discount Applied:</span>
-                  <span>-${payingInvoice.discountAmount.toFixed(2)}</span>
+                  <span>-{formatINR(payingInvoice.discountAmount)}</span>
                 </div>
               )}
               <div className="border-t border-zinc-200 pt-2 flex justify-between font-extrabold text-zinc-950 text-base">
                 <span>Total Due:</span>
-                <span>${payingInvoice.totalAmount.toFixed(2)}</span>
+                <span>{formatINR(payingInvoice.totalAmount)}</span>
               </div>
             </div>
 
@@ -494,8 +494,8 @@ export const CustomerDashboard: React.FC = () => {
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { id: 'CREDIT_CARD', label: 'Credit Card', icon: CreditCard },
-                  { id: 'BANK_TRANSFER', label: 'Bank Transfer', icon: Zap },
-                  { id: 'STRIPE', label: 'Stripe Pay', icon: DollarSign },
+                  { id: 'BANK_TRANSFER', label: 'Bank Wire / NEFT', icon: Zap },
+                  { id: 'STRIPE', label: 'UPI / NetBanking', icon: CreditCard },
                 ].map((m) => {
                   const Icon = m.icon;
                   return (
@@ -534,7 +534,7 @@ export const CustomerDashboard: React.FC = () => {
                 {isProcessingPay ? (
                   <span>Recording...</span>
                 ) : (
-                  <span>Confirm & Pay ${payingInvoice.totalAmount.toFixed(2)}</span>
+                  <span>Confirm &amp; Pay {formatINR(payingInvoice.totalAmount)}</span>
                 )}
               </button>
             </div>

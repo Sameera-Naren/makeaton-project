@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { CustomerSubscription, SubscriptionStatus } from '../types';
+import { formatINR } from '../utils/currency';
 import {
   Calendar,
   Layers,
@@ -178,7 +179,7 @@ export const SubscriptionsPage: React.FC = () => {
               {isStaffOrAdmin ? 'Staff Operations & Lifecycle' : 'Customer Portal'}
             </span>
             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-pastel-yellow text-amber-950">
-              Member 3 Engine
+              Lifecycle Engine
             </span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-950 tracking-tight">
@@ -295,7 +296,7 @@ export const SubscriptionsPage: React.FC = () => {
                       Frequency: <span className="font-semibold text-zinc-800">{sub.billingFrequency}</span>
                     </span>
                     <span className="font-mono font-bold text-zinc-950 text-sm">
-                      ${sub.totalAmount.toFixed(2)}
+                      {formatINR(sub.totalAmount)}
                     </span>
                   </div>
                 </div>
@@ -410,13 +411,13 @@ export const SubscriptionsPage: React.FC = () => {
                               {line.quantity}
                             </td>
                             <td className="py-3 px-4 text-right text-zinc-600 font-mono">
-                              ${line.unitPrice.toFixed(2)}
+                              {formatINR(line.unitPrice)}
                             </td>
                             <td className="py-3 px-4 text-right text-zinc-500">
                               {line.taxRate}%
                             </td>
                             <td className="py-3 px-4 text-right font-mono font-bold text-zinc-950">
-                              ${line.amount.toFixed(2)}
+                              {formatINR(line.amount)}
                             </td>
                           </tr>
                         ))}
@@ -427,7 +428,7 @@ export const SubscriptionsPage: React.FC = () => {
                             Total Recurring Amount:
                           </td>
                           <td className="py-3 px-4 text-right text-sm font-mono font-black text-indigo-600">
-                            ${selectedSub.totalAmount.toFixed(2)}
+                            {formatINR(selectedSub.totalAmount)}
                           </td>
                         </tr>
                       </tfoot>
@@ -435,7 +436,7 @@ export const SubscriptionsPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Staff / Admin Lifecycle Controls (Member 3 Interactive Workflow) */}
+                {/* Staff / Admin Lifecycle Controls */}
                 <div className="pt-6 border-t border-zinc-150 space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
