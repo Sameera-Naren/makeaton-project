@@ -1,9 +1,14 @@
 import bcrypt from 'bcryptjs';
 import {
+  BillingAnalytics,
   CustomerDashboardSummary,
   CustomerInvoice,
   CustomerPayment,
   CustomerSubscription,
+  InvoiceLineItem,
+  InvoiceStatus,
+  PaymentMethod,
+  PaymentStatus,
   Quotation,
   QuotationStatus,
   Role,
@@ -895,6 +900,308 @@ class Store {
       activeSubscriptions: activeSubs,
       recentInvoices: invoices.slice(0, 5),
       recentPayments: payments.slice(0, 5),
+    };
+  }
+
+  // =========================================================================
+  // MEMBER 4: BILLING, PAYMENTS & ANALYTICS METHODS
+  // =========================================================================
+
+  getAllInvoices(filters?: { status?: string; customerId?: string; search?: string }): CustomerInvoice[] {
+    let result = [...this.invoices];
+    if (filters?.status && filters.status !== 'ALL') {
+      result = result.filter((i) => i.status === filters.status);
+    }
+    if (filters?.customerId) {
+      result = result.filter((i) => i.customerId === filters.customerId);
+    }
+    if (filters?.search) {
+      const q = filters.search.toLowerCase();
+      result = result.filter(
+        (i) =>
+          i.invoiceNumber.toLowerCase().includes(q) ||
+          (i.subscriptionNumber && i.subscriptionNumber.toLowerCase().includes(q)) ||
+          (i.notes && i.notes.toLowerCase().includes(q))
+      );
+    }
+    return result.sort((a, b) => new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime());
+  }
+
+  generateInvoiceFromSubscription(
+    subscriptionId: string,
+    options?: {
+      dueDate?: string;
+      notes?: string;
+      discountPercent?: number;
+      status?: InvoiceStatus;
+    }
+  ): CustomerInvoice {
+    const subscription = this.subscriptions.find((s) => s.id === subscriptionId);
+    if (!subscription) {
+      throw new Error(`Subscription with ID "${subscriptionId}" not found.`);
+    }
+
+    const lines: InvoiceLineItem[] = (subscription.lines || []).map((l, idx) => ({
+      id: `invl-${Date.now()}-${idx}`,
+      description: l.variantName ? `${l.productName} (${l.variantName})` : l.productName,
+      quantity: l.quantity,
+      unitPrice: l.unitPrice,
+      taxRate: l.taxRate || 0,
+      amount: Number((l.quantity * l.unitPrice).toFixed(2)),
+    }));
+
+    const subtotal = lines.reduce((acc, l) => acc + l.amount, 0);
+    const taxAmount = lines.reduce((acc, l) => acc + (l.amount * ((l.taxRate || 0) / 100)), 0);
+    const discountPercent = options?.discountPercent ?? 0;
+    const discountAmount = Number(((subtotal * discountPercent) / 100).toFixed(2));
+    const totalAmount = Number((Math.max(0, subtotal - discountAmount) + taxAmount).toFixed(2));
+
+    const invoiceNumber = `INV-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const now = new Date();
+    const defaultDueDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    const invoice: CustomerInvoice = {
+      id: `inv-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
+      invoiceNumber,
+      customerId: subscription.customerId,
+      subscriptionId: subscription.id,
+      subscriptionNumber: subscription.subscriptionNumber,
+      issueDate: now.toISOString(),
+      dueDate: options?.dueDate || defaultDueDate,
+      subtotal: Number(subtotal.toFixed(2)),
+      taxAmount: Number(taxAmount.toFixed(2)),
+      discountAmount,
+      totalAmount,
+      status: options?.status || 'CONFIRMED',
+      notes:
+        options?.notes ||
+        `Auto-generated recurring invoice for ${subscription.subscriptionNumber} (${subscription.planName})`,
+      lines,
+    };
+
+    this.invoices.unshift(invoice);
+    return invoice;
+  }
+
+  createManualInvoice(data: {
+    customerId: string;
+    subscriptionId?: string;
+    dueDate?: string;
+    notes?: string;
+    lines: Array<{
+      description: string;
+      quantity: number;
+      unitPrice: number;
+      taxRate?: number;
+    }>;
+    discountAmount?: number;
+    status?: InvoiceStatus;
+  }): CustomerInvoice {
+    const customer = this.findUserById(data.customerId);
+    if (!customer) {
+      throw new Error(`Customer with ID "${data.customerId}" not found.`);
+    }
+
+    if (!data.lines || data.lines.length === 0) {
+      throw new Error('Invoice must contain at least one line item.');
+    }
+
+    const lines: InvoiceLineItem[] = data.lines.map((l, idx) => ({
+      id: `invl-${Date.now()}-${idx}`,
+      description: l.description,
+      quantity: l.quantity,
+      unitPrice: l.unitPrice,
+      taxRate: l.taxRate || 0,
+      amount: Number((l.quantity * l.unitPrice).toFixed(2)),
+    }));
+
+    const subtotal = lines.reduce((acc, l) => acc + l.amount, 0);
+    const taxAmount = lines.reduce((acc, l) => acc + (l.amount * ((l.taxRate || 0) / 100)), 0);
+    const discountAmount = data.discountAmount ?? 0;
+    const totalAmount = Number((Math.max(0, subtotal - discountAmount) + taxAmount).toFixed(2));
+
+    let subscriptionNumber: string | undefined = undefined;
+    if (data.subscriptionId) {
+      const sub = this.subscriptions.find((s) => s.id === data.subscriptionId);
+      if (sub) subscriptionNumber = sub.subscriptionNumber;
+    }
+
+    const invoiceNumber = `INV-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const now = new Date();
+    const defaultDueDate = new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000).toISOString();
+
+    const invoice: CustomerInvoice = {
+      id: `inv-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
+      invoiceNumber,
+      customerId: data.customerId,
+      subscriptionId: data.subscriptionId,
+      subscriptionNumber,
+      issueDate: now.toISOString(),
+      dueDate: data.dueDate || defaultDueDate,
+      subtotal: Number(subtotal.toFixed(2)),
+      taxAmount: Number(taxAmount.toFixed(2)),
+      discountAmount,
+      totalAmount,
+      status: data.status || 'DRAFT',
+      notes: data.notes || 'Manual invoice created by billing team.',
+      lines,
+    };
+
+    this.invoices.unshift(invoice);
+    return invoice;
+  }
+
+  updateInvoiceStatus(invoiceId: string, status: InvoiceStatus): CustomerInvoice {
+    const invoice = this.invoices.find((i) => i.id === invoiceId);
+    if (!invoice) {
+      throw new Error(`Invoice with ID "${invoiceId}" not found.`);
+    }
+
+    invoice.status = status;
+    return invoice;
+  }
+
+  getAllPayments(filters?: {
+    invoiceId?: string;
+    customerId?: string;
+    paymentMethod?: string;
+  }): CustomerPayment[] {
+    let result = [...this.payments];
+    if (filters?.invoiceId) {
+      result = result.filter((p) => p.invoiceId === filters.invoiceId);
+    }
+    if (filters?.customerId) {
+      result = result.filter((p) => p.customerId === filters.customerId);
+    }
+    if (filters?.paymentMethod) {
+      result = result.filter((p) => p.paymentMethod === filters.paymentMethod);
+    }
+    return result.sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime());
+  }
+
+  recordManualPayment(data: {
+    invoiceId: string;
+    amount: number;
+    paymentMethod: PaymentMethod;
+    paymentDate?: string;
+    referenceNote?: string;
+  }): { payment: CustomerPayment; invoice: CustomerInvoice; remainingBalance: number } {
+    const invoice = this.invoices.find((i) => i.id === data.invoiceId);
+    if (!invoice) {
+      throw new Error(`Invoice with ID "${data.invoiceId}" not found.`);
+    }
+
+    if (data.amount <= 0) {
+      throw new Error('Payment amount must be greater than zero.');
+    }
+
+    const paymentNumber = `PAY-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const payment: CustomerPayment = {
+      id: `pay-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
+      paymentNumber,
+      invoiceId: invoice.id,
+      invoiceNumber: invoice.invoiceNumber,
+      customerId: invoice.customerId,
+      amount: data.amount,
+      paymentMethod: data.paymentMethod,
+      paymentDate: data.paymentDate || new Date().toISOString(),
+      status: 'COMPLETED',
+      referenceNote: data.referenceNote || `Manual payment recorded by staff (${data.paymentMethod})`,
+    };
+
+    this.payments.unshift(payment);
+
+    // Calculate total payments completed for this invoice
+    const totalPaid = this.payments
+      .filter((p) => p.invoiceId === invoice.id && p.status === 'COMPLETED')
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    const remainingBalance = Number(Math.max(0, invoice.totalAmount - totalPaid).toFixed(2));
+
+    if (remainingBalance === 0) {
+      invoice.status = 'PAID';
+    }
+
+    return { payment, invoice, remainingBalance };
+  }
+
+  getBillingAnalytics(): BillingAnalytics {
+    const activeSubs = this.subscriptions.filter((s) => s.status === 'ACTIVE');
+
+    // Calculate MRR accurately based on subscription billing frequency:
+    const mrr = activeSubs.reduce((acc, sub) => {
+      switch (sub.billingFrequency) {
+        case 'DAILY':
+          return acc + sub.totalAmount * 30;
+        case 'WEEKLY':
+          return acc + sub.totalAmount * 4.3333;
+        case 'YEARLY':
+          return acc + sub.totalAmount / 12;
+        case 'MONTHLY':
+        default:
+          return acc + sub.totalAmount;
+      }
+    }, 0);
+
+    const totalRevenueCollected = this.payments
+      .filter((p) => p.status === 'COMPLETED')
+      .reduce((acc, p) => acc + p.amount, 0);
+
+    const confirmedInvoices = this.invoices.filter((i) => i.status === 'CONFIRMED');
+    const overdueInvoices = this.invoices.filter((i) => i.status === 'OVERDUE');
+    const draftInvoices = this.invoices.filter((i) => i.status === 'DRAFT');
+    const paidInvoices = this.invoices.filter((i) => i.status === 'PAID');
+    const cancelledInvoices = this.invoices.filter((i) => i.status === 'CANCELLED');
+
+    const outstandingReceivables = confirmedInvoices.reduce((acc, i) => acc + i.totalAmount, 0);
+    const overdueAmount = overdueInvoices.reduce((acc, i) => acc + i.totalAmount, 0);
+
+    const methods: PaymentMethod[] = ['CREDIT_CARD', 'BANK_TRANSFER', 'STRIPE', 'CASH', 'UPI'];
+    const paymentMethodsBreakdown = methods.map((method) => {
+      const filtered = this.payments.filter((p) => p.paymentMethod === method && p.status === 'COMPLETED');
+      return {
+        method,
+        count: filtered.length,
+        amount: Number(filtered.reduce((acc, p) => acc + p.amount, 0).toFixed(2)),
+      };
+    });
+
+    return {
+      totalActiveSubscriptions: activeSubs.length,
+      totalSubscriptions: this.subscriptions.length,
+      mrr: Number(mrr.toFixed(2)),
+      arr: Number((mrr * 12).toFixed(2)),
+      totalRevenueCollected: Number(totalRevenueCollected.toFixed(2)),
+      outstandingReceivables: Number((outstandingReceivables + overdueAmount).toFixed(2)),
+      overdueAmount: Number(overdueAmount.toFixed(2)),
+      overdueInvoicesCount: overdueInvoices.length,
+      paidInvoicesCount: paidInvoices.length,
+      totalInvoicesCount: this.invoices.length,
+      invoicesByStatus: {
+        DRAFT: {
+          count: draftInvoices.length,
+          amount: Number(draftInvoices.reduce((acc, i) => acc + i.totalAmount, 0).toFixed(2)),
+        },
+        CONFIRMED: {
+          count: confirmedInvoices.length,
+          amount: Number(confirmedInvoices.reduce((acc, i) => acc + i.totalAmount, 0).toFixed(2)),
+        },
+        PAID: {
+          count: paidInvoices.length,
+          amount: Number(paidInvoices.reduce((acc, i) => acc + i.totalAmount, 0).toFixed(2)),
+        },
+        OVERDUE: {
+          count: overdueInvoices.length,
+          amount: Number(overdueInvoices.reduce((acc, i) => acc + i.totalAmount, 0).toFixed(2)),
+        },
+        CANCELLED: {
+          count: cancelledInvoices.length,
+          amount: Number(cancelledInvoices.reduce((acc, i) => acc + i.totalAmount, 0).toFixed(2)),
+        },
+      },
+      paymentMethodsBreakdown,
+      recentInvoices: this.invoices.slice(0, 5),
+      recentPayments: this.payments.slice(0, 5),
     };
   }
 }

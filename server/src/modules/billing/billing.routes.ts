@@ -1,43 +1,76 @@
 import { Router } from 'express';
 import { authenticateToken, requireRole } from '../../middleware/auth.middleware.js';
-import { dbStore } from '../../lib/store.js';
+import {
+  generateInvoiceFromSubscription,
+  getAllInvoices,
+  getInvoiceById,
+  createManualInvoice,
+  updateInvoiceStatus,
+  recordManualPayment,
+  getAllPayments,
+  getBillingAnalytics,
+} from './billing.controller.js';
 
 // BILLING, PAYMENTS & ANALYTICS MODULE
 const router = Router();
 
-// Staff/Admin view all invoices
-router.get('/invoices', authenticateToken, requireRole('ADMIN', 'STAFF'), (req, res) => {
-  res.json({
-    success: true,
-    data: dbStore.invoices,
-  });
-});
+// Invoices Endpoints
+router.post(
+  '/invoices/generate',
+  authenticateToken,
+  requireRole('ADMIN', 'STAFF'),
+  generateInvoiceFromSubscription
+);
+router.get(
+  '/invoices',
+  authenticateToken,
+  requireRole('ADMIN', 'STAFF'),
+  getAllInvoices
+);
+router.get(
+  '/invoices/:id',
+  authenticateToken,
+  requireRole('ADMIN', 'STAFF'),
+  getInvoiceById
+);
+router.post(
+  '/invoices',
+  authenticateToken,
+  requireRole('ADMIN', 'STAFF'),
+  createManualInvoice
+);
+router.put(
+  '/invoices/:id/status',
+  authenticateToken,
+  requireRole('ADMIN', 'STAFF'),
+  updateInvoiceStatus
+);
 
-// Staff/Admin view all payments
-router.get('/payments', authenticateToken, requireRole('ADMIN', 'STAFF'), (req, res) => {
-  res.json({
-    success: true,
-    data: dbStore.payments,
-  });
-});
+// Payments Endpoints
+router.post(
+  '/payments',
+  authenticateToken,
+  requireRole('ADMIN', 'STAFF'),
+  recordManualPayment
+);
+router.get(
+  '/payments',
+  authenticateToken,
+  requireRole('ADMIN', 'STAFF'),
+  getAllPayments
+);
 
-// Analytics overview
-router.get('/analytics/overview', authenticateToken, requireRole('ADMIN', 'STAFF'), (req, res) => {
-  const activeSubs = dbStore.subscriptions.filter((s) => s.status === 'ACTIVE').length;
-  const totalRevenue = dbStore.payments.reduce((acc, p) => acc + p.amount, 0);
-  const outstandingRevenue = dbStore.invoices
-    .filter((i) => i.status === 'CONFIRMED' || i.status === 'OVERDUE')
-    .reduce((acc, i) => acc + i.totalAmount, 0);
-
-  res.json({
-    success: true,
-    data: {
-      activeSubscriptions: activeSubs,
-      totalRevenueCollected: totalRevenue,
-      outstandingReceivables: outstandingRevenue,
-      overdueInvoicesCount: dbStore.invoices.filter((i) => i.status === 'OVERDUE').length,
-    },
-  });
-});
+router.get(
+  '/analytics',
+  authenticateToken,
+  requireRole('ADMIN', 'STAFF'),
+  getBillingAnalytics
+);
+router.get(
+  '/analytics/overview',
+  authenticateToken,
+  requireRole('ADMIN', 'STAFF'),
+  getBillingAnalytics
+);
 
 export default router;

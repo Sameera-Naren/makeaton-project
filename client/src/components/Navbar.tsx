@@ -6,30 +6,40 @@ import { LogOut, ArrowUpRight, ShieldCheck, UserCheck, Layers, Plus } from 'luci
 export const Navbar: React.FC = () => {
   const { user, logout, quickDemoLogin } = useAuth();
   const navigate = useNavigate();
+  const isStaffOrAdmin = user?.role === 'STAFF' || user?.role === 'ADMIN';
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const navLinks = [
-    { name: 'Dashboard', path: '/' },
-    { name: 'Quotations', path: '/quotations' },
-    { name: 'Subscriptions', path: '/subscriptions' },
-    { name: 'Invoices', path: '/invoices' },
-    { name: 'Payments', path: '/payments' },
-    { name: 'Account', path: '/profile' },
-  ];
+  const navLinks = isStaffOrAdmin
+    ? [
+        { name: 'Billing Analytics', path: '/billing/analytics' },
+        { name: 'Quotations', path: '/quotations' },
+        { name: 'Subscriptions', path: '/subscriptions' },
+        { name: 'Invoices', path: '/invoices' },
+        { name: 'Payments', path: '/payments' },
+        { name: 'Customer View', path: '/customer' },
+      ]
+    : [
+        { name: 'Dashboard', path: '/' },
+        { name: 'Subscriptions', path: '/subscriptions' },
+        { name: 'Invoices', path: '/invoices' },
+        { name: 'Payments', path: '/payments' },
+        { name: 'Account', path: '/profile' },
+      ];
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-zinc-100">
-      {/* Top Demo Bar for Hackathon judges & reviewers */}
       <div className="bg-zinc-900 text-zinc-300 px-4 py-1.5 text-xs flex flex-wrap items-center justify-between border-b border-zinc-800">
         <div className="flex items-center gap-2">
           <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span className="font-semibold text-zinc-100">Brightloop Subscription Platform</span>
           <span className="hidden sm:inline text-zinc-500">|</span>
-          <span className="hidden sm:inline text-zinc-400">Enterprise Operations &amp; Billing</span>
+          <span className="hidden sm:inline text-zinc-400 font-medium">
+            Enterprise Subscription &amp; Revenue Engine
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-zinc-400">Quick Switch:</span>
@@ -66,9 +76,7 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Reference Style Header */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        {/* Logo */}
         <div className="flex items-center gap-3">
           <NavLink to="/" className="flex items-center gap-2 group">
             <div className="w-9 h-9 rounded-full bg-zinc-900 flex items-center justify-center text-white font-bold group-hover:scale-105 transition-transform">
@@ -79,13 +87,12 @@ export const Navbar: React.FC = () => {
                 brightloop
               </span>
               <span className="text-[10px] tracking-wider uppercase text-zinc-400 font-semibold">
-                Enterprise Suite
+                {isStaffOrAdmin ? 'Billing & Management' : 'Customer Portal'}
               </span>
             </div>
           </NavLink>
         </div>
 
-        {/* Center Nav Links */}
         <nav className="hidden md:flex items-center gap-7">
           {navLinks.map((link) => (
             <NavLink
@@ -104,9 +111,7 @@ export const Navbar: React.FC = () => {
           ))}
         </nav>
 
-        {/* Right Action Buttons */}
         <div className="flex items-center gap-3">
-          {/* Quick Create Quote Button (Staff/Admin) */}
           {(user?.role === 'STAFF' || user?.role === 'ADMIN') && (
             <Link
               to="/quotations/new"

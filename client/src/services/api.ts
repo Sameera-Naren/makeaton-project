@@ -1,8 +1,11 @@
 import {
+  BillingAnalytics,
   CustomerDashboardSummary,
   CustomerInvoice,
   CustomerPayment,
   CustomerSubscription,
+  InvoiceStatus,
+  PaymentMethod,
   Quotation,
   User,
 } from '../types';
@@ -134,9 +137,6 @@ export const api = {
     },
   },
 
-  // ==========================================
-  // QUOTATIONS API
-  // ==========================================
   quotations: {
     getAll: async (status?: string): Promise<Quotation[]> => {
       const query = status && status !== 'ALL' ? `?status=${status}` : '';
@@ -193,9 +193,110 @@ export const api = {
     },
   },
 
-  // ==========================================
-  // SUBSCRIPTIONS (STAFF/ADMIN)
-  // ==========================================
+  billing: {
+    getAnalytics: async (): Promise<BillingAnalytics> => {
+      return request<BillingAnalytics>('/billing/analytics');
+    },
+
+    getInvoices: async (params?: {
+      status?: string;
+      customerId?: string;
+      search?: string;
+    }): Promise<CustomerInvoice[]> => {
+      const query = new URLSearchParams();
+      if (params?.status) query.append('status', params.status);
+      if (params?.customerId) query.append('customerId', params.customerId);
+      if (params?.search) query.append('search', params.search);
+      const qs = query.toString();
+      return request<CustomerInvoice[]>(`/billing/invoices${qs ? `?${qs}` : ''}`);
+    },
+
+    getInvoiceById: async (
+      id: string
+    ): Promise<CustomerInvoice & { customer?: User; payments: CustomerPayment[] }> => {
+      return request<CustomerInvoice & { customer?: User; payments: CustomerPayment[] }>(
+        `/billing/invoices/${id}`
+      );
+    },
+
+    generateInvoice: async (data: {
+      subscriptionId: string;
+      dueDate?: string;
+      notes?: string;
+      discountPercent?: number;
+      status?: InvoiceStatus;
+    }): Promise<CustomerInvoice> => {
+      return request<CustomerInvoice>('/billing/invoices/generate', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    createInvoice: async (data: {
+      customerId: string;
+      subscriptionId?: string;
+      dueDate?: string;
+      notes?: string;
+      lines: Array<{
+        description: string;
+        quantity: number;
+        unitPrice: number;
+        taxRate?: number;
+      }>;
+      discountAmount?: number;
+      status?: InvoiceStatus;
+    }): Promise<CustomerInvoice> => {
+      return request<CustomerInvoice>('/billing/invoices', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+
+    updateInvoiceStatus: async (
+      id: string,
+      status: InvoiceStatus
+    ): Promise<CustomerInvoice> => {
+      return request<CustomerInvoice>(`/billing/invoices/${id}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({ status }),
+      });
+    },
+
+    getPayments: async (params?: {
+      invoiceId?: string;
+      customerId?: string;
+      paymentMethod?: string;
+    }): Promise<CustomerPayment[]> => {
+      const query = new URLSearchParams();
+      if (params?.invoiceId) query.append('invoiceId', params.invoiceId);
+      if (params?.customerId) query.append('customerId', params.customerId);
+      if (params?.paymentMethod) query.append('paymentMethod', params.paymentMethod);
+      const qs = query.toString();
+      return request<CustomerPayment[]>(`/billing/payments${qs ? `?${qs}` : ''}`);
+    },
+
+    recordPayment: async (data: {
+      invoiceId: string;
+      amount: number;
+      paymentMethod: PaymentMethod;
+      paymentDate?: string;
+      referenceNote?: string;
+    }): Promise<{
+      payment: CustomerPayment;
+      invoice: CustomerInvoice;
+      remainingBalance: number;
+    }> => {
+      return request<{
+        payment: CustomerPayment;
+        invoice: CustomerInvoice;
+        remainingBalance: number;
+      }>('/billing/payments', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+  },
+
   subscriptions: {
     getAll: async (): Promise<CustomerSubscription[]> => {
       return request<CustomerSubscription[]>('/subscriptions/all');
@@ -235,7 +336,6 @@ export const api = {
     },
   },
 
-  // Helper product queries
   products: {
     getAll: async (): Promise<any[]> => {
       return request<any[]>('/products');
