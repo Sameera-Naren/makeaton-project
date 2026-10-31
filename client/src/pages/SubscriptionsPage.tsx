@@ -220,15 +220,6 @@ export const SubscriptionsPage: React.FC = () => {
               </button>
             ))}
           </div>
-
-          {isStaffOrAdmin && (
-            <Link
-              to="/quotations/new"
-              className="px-4 py-2 rounded-full bg-zinc-950 text-white text-xs font-bold hover:bg-zinc-800 transition flex items-center gap-1.5"
-            >
-              <span>+ New Quotation</span>
-            </Link>
-          )}
         </div>
       </div>
 

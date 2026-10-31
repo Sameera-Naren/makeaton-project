@@ -1,10 +1,10 @@
 import React from 'react';
-import { NavLink, useNavigate, Link } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, ArrowUpRight, ShieldCheck, UserCheck, Layers, Plus } from 'lucide-react';
+import { LogOut, ShieldCheck, UserCheck, Layers } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
-  const { user, logout, quickDemoLogin } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const isStaffOrAdmin = user?.role === 'STAFF' || user?.role === 'ADMIN';
 
@@ -20,7 +20,6 @@ export const Navbar: React.FC = () => {
         { name: 'Subscriptions', path: '/subscriptions' },
         { name: 'Invoices', path: '/invoices' },
         { name: 'Payments', path: '/payments' },
-        { name: 'Customer View', path: '/customer' },
       ]
     : [
         { name: 'Dashboard', path: '/' },
@@ -32,50 +31,6 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-zinc-100">
-      <div className="bg-zinc-900 text-zinc-300 px-4 py-1.5 text-xs flex flex-wrap items-center justify-between border-b border-zinc-800">
-        <div className="flex items-center gap-2">
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span className="font-semibold text-zinc-100">Brightloop Subscription Platform</span>
-          <span className="hidden sm:inline text-zinc-500">|</span>
-          <span className="hidden sm:inline text-zinc-400 font-medium">
-            Enterprise Subscription &amp; Revenue Engine
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-zinc-400">Quick Switch:</span>
-          <button
-            onClick={() => quickDemoLogin('CUSTOMER')}
-            className={`px-2 py-0.5 rounded text-[11px] font-medium transition ${
-              user?.role === 'CUSTOMER'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
-            }`}
-          >
-            Customer (Alex)
-          </button>
-          <button
-            onClick={() => quickDemoLogin('STAFF')}
-            className={`px-2 py-0.5 rounded text-[11px] font-medium transition ${
-              user?.role === 'STAFF'
-                ? 'bg-amber-600 text-white'
-                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
-            }`}
-          >
-            Staff (Sarah)
-          </button>
-          <button
-            onClick={() => quickDemoLogin('ADMIN')}
-            className={`px-2 py-0.5 rounded text-[11px] font-medium transition ${
-              user?.role === 'ADMIN'
-                ? 'bg-purple-600 text-white'
-                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
-            }`}
-          >
-            Admin (Marcus)
-          </button>
-        </div>
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <NavLink to="/" className="flex items-center gap-2 group">
@@ -112,16 +67,6 @@ export const Navbar: React.FC = () => {
         </nav>
 
         <div className="flex items-center gap-3">
-          {(user?.role === 'STAFF' || user?.role === 'ADMIN') && (
-            <Link
-              to="/quotations/new"
-              className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-zinc-950 text-white text-xs font-bold hover:bg-zinc-800 transition shadow-sm"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>+ Quote</span>
-            </Link>
-          )}
-
           {user && (
             <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-zinc-200 bg-zinc-50 text-xs text-zinc-700">
               {user.role === 'ADMIN' && <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />}

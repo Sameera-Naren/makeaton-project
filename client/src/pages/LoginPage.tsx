@@ -12,11 +12,10 @@ import {
   Mail,
   User,
   Building,
-  Sparkles,
 } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
-  const { login, register, quickDemoLogin } = useAuth();
+  const { login, register } = useAuth();
   const navigate = useNavigate();
 
   const [isRegisterMode, setIsRegisterMode] = useState(false);
@@ -73,19 +72,6 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleQuickDemo = async (demoRole: 'CUSTOMER' | 'STAFF' | 'ADMIN') => {
-    try {
-      setLoading(true);
-      setErrorMsg(null);
-      await quickDemoLogin(demoRole);
-      navigate('/');
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Demo login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleForgotSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!forgotEmail) return;
@@ -99,42 +85,6 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#fcfcfd] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
-      {/* Hackathon Quick Demo Header */}
-      <div className="max-w-md w-full mx-auto mb-6 bg-zinc-900 text-white rounded-3xl p-4 shadow-lg border border-zinc-800">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-300">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Hackathon Quick-Access Credentials:</span>
-          </div>
-          <span className="text-[10px] bg-zinc-800 px-2 py-0.5 rounded-full text-zinc-400">
-            1-Click Demo
-          </span>
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          <button
-            type="button"
-            onClick={() => handleQuickDemo('CUSTOMER')}
-            className="px-2.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-[11px] font-bold text-white transition text-center shadow-sm"
-          >
-            Customer (Alex)
-          </button>
-          <button
-            type="button"
-            onClick={() => handleQuickDemo('STAFF')}
-            className="px-2.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-[11px] font-bold text-white transition text-center shadow-sm"
-          >
-            Staff (Sarah)
-          </button>
-          <button
-            type="button"
-            onClick={() => handleQuickDemo('ADMIN')}
-            className="px-2.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-[11px] font-bold text-white transition text-center shadow-sm"
-          >
-            Admin (Marcus)
-          </button>
-        </div>
-      </div>
-
       <div className="max-w-md w-full mx-auto space-y-8">
         {/* Brand header */}
         <div className="text-center space-y-2">
