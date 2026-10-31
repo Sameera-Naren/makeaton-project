@@ -8,6 +8,17 @@ import { InvoicesPage } from './pages/InvoicesPage';
 import { PaymentsPage } from './pages/PaymentsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { LoginPage } from './pages/LoginPage';
+import { BillingAnalyticsPage } from './pages/BillingAnalyticsPage';
+import { BillingInvoicesPage } from './pages/BillingInvoicesPage';
+import { BillingPaymentsPage } from './pages/BillingPaymentsPage';
+
+const DynamicDashboard: React.FC = () => {
+  const { user } = useAuth();
+  if (user?.role === 'STAFF' || user?.role === 'ADMIN') {
+    return <BillingAnalyticsPage />;
+  }
+  return <CustomerDashboard />;
+};
 
 const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
@@ -31,7 +42,7 @@ const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
       <footer className="border-t border-zinc-200/80 bg-white py-6 text-center text-xs text-zinc-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>Brightloop Software Platform — Hackathon 2026 Edition</span>
-          <span className="text-zinc-400">Team Modular Monolith • Member 1 Portal Active</span>
+          <span className="text-zinc-400">Team Modular Monolith • Member 1 & Member 4 Active</span>
         </div>
       </footer>
     </div>
@@ -48,7 +59,47 @@ export const App: React.FC = () => {
             path="/"
             element={
               <ProtectedLayout>
+                <DynamicDashboard />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/customer"
+            element={
+              <ProtectedLayout>
                 <CustomerDashboard />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/billing"
+            element={
+              <ProtectedLayout>
+                <BillingAnalyticsPage />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/billing/analytics"
+            element={
+              <ProtectedLayout>
+                <BillingAnalyticsPage />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/billing/invoices"
+            element={
+              <ProtectedLayout>
+                <BillingInvoicesPage />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/billing/payments"
+            element={
+              <ProtectedLayout>
+                <BillingPaymentsPage />
               </ProtectedLayout>
             }
           />

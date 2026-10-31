@@ -94,3 +94,30 @@ export interface CustomerDashboardSummary {
   recentInvoices: CustomerInvoice[];
   recentPayments: CustomerPayment[];
 }
+
+export interface BillingAnalytics {
+  totalActiveSubscriptions: number;
+  totalSubscriptions: number;
+  mrr: number;
+  arr: number;
+  totalRevenueCollected: number;
+  outstandingReceivables: number;
+  overdueAmount: number;
+  overdueInvoicesCount: number;
+  paidInvoicesCount: number;
+  totalInvoicesCount: number;
+  invoicesByStatus: {
+    DRAFT: { count: number; amount: number };
+    CONFIRMED: { count: number; amount: number };
+    PAID: { count: number; amount: number };
+    OVERDUE: { count: number; amount: number };
+    CANCELLED: { count: number; amount: number };
+  };
+  paymentMethodsBreakdown: {
+    method: PaymentMethod;
+    count: number;
+    amount: number;
+  }[];
+  recentInvoices: CustomerInvoice[];
+  recentPayments: CustomerPayment[];
+}

@@ -12,13 +12,22 @@ export const Navbar: React.FC = () => {
     navigate('/login');
   };
 
-  const navLinks = [
-    { name: 'Dashboard', path: '/' },
-    { name: 'Subscriptions', path: '/subscriptions' },
-    { name: 'Invoices', path: '/invoices' },
-    { name: 'Payments', path: '/payments' },
-    { name: 'Account', path: '/profile' },
-  ];
+  const isStaffOrAdmin = user?.role === 'STAFF' || user?.role === 'ADMIN';
+
+  const navLinks = isStaffOrAdmin
+    ? [
+        { name: 'Billing Analytics', path: '/billing/analytics' },
+        { name: 'Manage Invoices', path: '/billing/invoices' },
+        { name: 'Payments Ledger', path: '/billing/payments' },
+        { name: 'Customer View', path: '/customer' },
+      ]
+    : [
+        { name: 'Dashboard', path: '/' },
+        { name: 'Subscriptions', path: '/subscriptions' },
+        { name: 'Invoices', path: '/invoices' },
+        { name: 'Payments', path: '/payments' },
+        { name: 'Account', path: '/profile' },
+      ];
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-zinc-100">
@@ -28,7 +37,9 @@ export const Navbar: React.FC = () => {
           <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span className="font-semibold text-zinc-100">Brightloop Subscription Platform</span>
           <span className="hidden sm:inline text-zinc-500">|</span>
-          <span className="hidden sm:inline text-zinc-400">Member 1 Module: Auth & Customer Portal</span>
+          <span className="hidden sm:inline text-indigo-400 font-medium">
+            Member 4 Module: Billing, Payments & Analytics Active
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-zinc-400">Quick Switch:</span>
@@ -78,7 +89,7 @@ export const Navbar: React.FC = () => {
                 brightloop
               </span>
               <span className="text-[10px] tracking-wider uppercase text-zinc-400 font-semibold">
-                Customer Portal
+                {isStaffOrAdmin ? 'Billing & Management' : 'Customer Portal'}
               </span>
             </div>
           </NavLink>
